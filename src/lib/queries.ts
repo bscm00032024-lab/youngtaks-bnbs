@@ -1,42 +1,44 @@
-import { supabase } from './supabase'
-import type { Location, Unit } from './database.types'
+import type { Booking } from './database.types'
 
-export async function getActiveLocations(): Promise<Location[]> {
+export async function createBooking(booking: {
+  unit_id: string
+  check_in: string
+  check_out: string
+  customer_name: string
+  customer_phone: string
+}): Promise<Booking> {
   const { data, error } = await supabase
-    .from('locations')
-    .select('*')
-    .eq('active', true)
-    .order('name')
-
-  if (error) throw error
-  return data ?? []
-}
-
-export async function getLocationById(id: string): Promise<Location | null> {
-  const { data, error } = await supabase
-    .from('locations')
-    .select('*')
-    .eq('id', id)
+    .from('bookings')
+    .insert({
+      ...booking,
+      status: 'pending_payment',
+      mpesa_code: null,
+      wifi_details: null,
+      door_code: null,
+      location_pin: null,
+    })
+    .select()
     .single()
 
-  if (error) return null
+  if (error) throw error
   return data
 }
 
-export async function getUnitsByLocation(locationId: string): Promise<Unit[]> {
+export async function submitMpesaCode(bookingId: string, mpesaCode: string): Promise<Booking> {
   const { data, error } = await supabase
-    .from('units')
-    .select('*')
-    .eq('location_id', locationId)
-    .order('price')
+    .from('bookings')
+    .update({ status: 'payment_submitted', mpesa_code: mpesaCode })
+    .eq('id', bookingId)
+    .select()
+    .single()
 
   if (error) throw error
-  return data ?? []
+  return data
 }
 
-export async function getUnitById(id: string): Promise<Unit | null> {
+export async function getBookingById(id: string): Promise<Booking | null> {
   const { data, error } = await supabase
-    .from('units')
+    .from('bookings')
     .select('*')
     .eq('id', id)
     .single()

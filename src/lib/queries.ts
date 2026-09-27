@@ -153,7 +153,7 @@ export async function createLocation(location: {
 
 export async function updateLocation(
   id: string,
-  updates: { name?: string; description?: string | null; active?: boolean }
+  updates: { name?: string; description?: string | null; active?: boolean; image_url?: string | null }
 ): Promise<Location> {
   const { data, error } = await supabase
     .from('locations')
@@ -169,6 +169,17 @@ export async function updateLocation(
 export async function deleteLocation(id: string): Promise<void> {
   const { error } = await supabase.from('locations').delete().eq('id', id)
   if (error) throw error
+}
+
+export async function uploadLocationImage(file: File, locationId: string): Promise<string> {
+  const fileExt = file.name.split('.').pop()
+  const fileName = 'locations/' + locationId + '-' + Date.now() + '.' + fileExt
+
+  const { error } = await supabase.storage.from('unit-media').upload(fileName, file)
+  if (error) throw error
+
+  const { data } = supabase.storage.from('unit-media').getPublicUrl(fileName)
+  return data.publicUrl
 }
 
 export interface UnitWithLocation extends Unit {
@@ -303,6 +314,7 @@ export async function deleteBlogPost(id: string): Promise<void> {
 
 export interface LocationWithStartingPrice extends Location {
   starting_price: number | null
+  image_url?: string | null
 }
 
 export async function getLocationsWithStartingPrice(): Promise<LocationWithStartingPrice[]> {

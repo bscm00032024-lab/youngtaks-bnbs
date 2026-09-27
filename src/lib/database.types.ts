@@ -17,6 +17,7 @@ export interface Unit {
   amenities: string[]
   description: string | null
   photos: string[]
+  videos: string[]
   created_at: string
 }
 

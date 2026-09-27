@@ -239,3 +239,122 @@ export default function LocationsPage() {
           {!loading && !error && (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
               {sortedLocations.map((location) => (
+                <Link
+                  key={location.id}
+                  to={`/locations/${location.id}`}
+                  className="group flex flex-col bg-white rounded-2xl border overflow-hidden hover:shadow-lg transition-shadow"
+                  style={{ borderColor: CARD_BORDER }}
+                >
+                  {location.image_url && (
+                    <div className="h-40 md:h-44 overflow-hidden">
+                      <img
+                        src={location.image_url}
+                        alt={location.name}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5 md:p-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg md:text-xl font-extrabold uppercase" style={headingStyle()}>
+                        {location.name}
+                      </h3>
+                      <span className="text-sm" style={{ color: RED }}>→</span>
+                    </div>
+                    {location.description && (
+                      <p className="mt-3 text-sm leading-relaxed" style={{ color: '#6A6A6A' }}>{location.description}</p>
+                    )}
+                    <p className="mt-3 text-sm">
+                      {location.starting_price != null ? (
+                        <>
+                          <span className="font-bold" style={{ color: RED }}>
+                            KES {location.starting_price.toLocaleString()}
+                          </span>{' '}
+                          <span style={{ color: '#6A6A6A' }}>/ night and up</span>
+                        </>
+                      ) : (
+                        <span className="font-bold" style={{ color: RED }}>See units</span>
+                      )}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* How it works + payment banner */}
+      <section id="how" className="max-w-6xl mx-auto px-5 md:px-8 py-12 md:py-16">
+        <h2 className="text-3xl md:text-4xl font-extrabold uppercase mb-6" style={headingStyle()}>How it works</h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+          {STEPS.map((step) => (
+            <div
+              key={step.n}
+              className="bg-white rounded-xl border p-5 md:p-6"
+              style={{ borderColor: CARD_BORDER }}
+            >
+              <p className="text-3xl font-extrabold mb-4" style={{ fontFamily: HEADING_FONT, color: RED }}>
+                {step.n}
+              </p>
+              <p className="text-base font-bold mb-2" style={{ color: INK }}>{step.title}</p>
+              <p className="text-sm leading-relaxed" style={{ color: '#6A6A6A' }}>{step.body}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Payment banner */}
+        <div
+          className="mt-8 rounded-xl p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6"
+          style={{ background: '#14100E' }}
+        >
+          <div>
+            <h3
+              className="text-xl md:text-2xl font-extrabold uppercase"
+              style={{ fontFamily: HEADING_FONT, letterSpacing: '-0.015em', color: '#FFFFFF' }}
+            >
+              Pay straight to YoungTaks — no apps, no cards.
+            </h3>
+            <p className="mt-2 text-sm" style={{ color: '#D6D3CE' }}>
+              Send Money {PHONE_DISPLAY} ({PAYEE_NAME}) or Paybill {PAYBILL}, Account {PAYBILL_ACCOUNT}.
+            </p>
+          </div>
+          
+            href="#locations"
+            className="inline-block self-start md:self-center text-sm font-semibold text-white px-6 py-3 rounded-md whitespace-nowrap"
+            style={{ background: RED }}
+          >
+            Start booking
+          </a>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer style={{ background: '#0B0B0B' }}>
+        <div className="max-w-6xl mx-auto px-5 md:px-8 py-10">
+          <p className="text-base font-extrabold" style={{ fontFamily: HEADING_FONT, color: '#FFFFFF' }}>YoungTaks BNBs</p>
+          <p className="text-xs mb-6" style={{ color: RED }}>Your Trusted Booking Partner</p>
+
+          <div className="grid sm:grid-cols-2 gap-6 text-xs" style={{ color: '#B5B5B5' }}>
+            <div>
+              <p className="font-semibold mb-1" style={{ color: '#E5E5E5' }}>Pay via M-Pesa</p>
+              <p>Send Money: {PHONE_DISPLAY} — {PAYEE_NAME}</p>
+              <p>Paybill: {PAYBILL} · Account: {PAYBILL_ACCOUNT}</p>
+            </div>
+            <div>
+              <p className="font-semibold mb-1" style={{ color: '#E5E5E5' }}>Talk to us</p>
+              <p>{PHONE_DISPLAY}</p>
+              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" style={{ color: RED }}>Message us on WhatsApp →</a>
+            </div>
+          </div>
+
+          <p className="text-[11px] mt-6" style={{ color: '#6A6A6A' }}>
+            Prices shown are for the current season and may change. · © 2026 YoungTaks BNBs
+          </p>
+        </div>
+      </footer>
+    </div>
+  )
+}

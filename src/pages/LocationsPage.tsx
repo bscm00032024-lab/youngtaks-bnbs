@@ -155,4 +155,206 @@ export default function LocationsPage() {
             <a href="#how" className="text-sm font-semibold px-5 py-3 rounded-lg border bg-white" style={{ borderColor: CARD_BORDER, color: INK }}>How it works</a>
           </div>
 
-          <ul className="mt-6 flex
+          <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs" style={{ color: '#5A5A5A' }}>
+            <li><span style={{ color: RED }}>✓</span> Check-in 10:00 AM</li>
+            <li><span style={{ color: RED }}>✓</span> Pay via M-Pesa</li>
+            <li><span style={{ color: RED }}>✓</span> WhatsApp support</li>
+          </ul>
+        </div>
+
+        <div>
+          <div
+            className="relative rounded-2xl h-64 md:h-96 overflow-hidden shadow-2xl"
+            style={{
+              background: 'linear-gradient(135deg, #D6282822, #F5A62322, #0F766E22)',
+              border: `3px solid ${INK}`,
+            }}
+          >
+            {siteSettings?.hero_media_url ? (
+              siteSettings.hero_media_type === 'video' ? (
+                <video src={siteSettings.hero_media_url} className="w-full h-full object-cover" controls />
+              ) : (
+                <img src={siteSettings.hero_media_url} className="w-full h-full object-cover" alt="Featured YoungTaks stay" />
+              )
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-xs text-center px-6" style={{ color: '#9A9A9A' }}>
+                No photo or video added yet
+              </div>
+            )}
+
+            {isAdmin && (
+              <div className="absolute bottom-3 right-3 flex gap-2">
+                {siteSettings?.hero_media_url && (
+                  <button
+                    onClick={handleHeroMediaRemove}
+                    disabled={heroUploading}
+                    className="text-xs font-semibold text-white px-4 py-2 rounded-full shadow disabled:opacity-60"
+                    style={{ background: '#5A5A5A' }}
+                  >
+                    Remove
+                  </button>
+                )}
+                <label
+                  className="text-xs font-semibold text-white px-4 py-2 rounded-full cursor-pointer shadow"
+                  style={{ background: INK, opacity: heroUploading ? 0.6 : 1 }}
+                >
+                  {heroUploading ? 'Uploading...' : siteSettings?.hero_media_url ? 'Change photo/video' : 'Add photo/video'}
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    className="hidden"
+                    disabled={heroUploading}
+                    onChange={handleHeroMediaChange}
+                  />
+                </label>
+              </div>
+            )}
+          </div>
+          {isAdmin && heroError && <p className="mt-2 text-xs text-red-600">{heroError}</p>}
+        </div>
+      </section>
+
+      <section id="locations" style={{ background: '#F3F1EC' }}>
+        <div className="max-w-6xl mx-auto px-5 md:px-8 py-12 md:py-16">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-8">
+            <div>
+              <h2 className="text-3xl md:text-5xl font-extrabold uppercase" style={headingStyle()}>Where to?</h2>
+              <p className="mt-2 text-sm md:text-base" style={{ color: '#5A5A5A' }}>
+                {countWord} location{locations.length !== 1 ? 's' : ''} along the coast. Pick one to see every unit.
+              </p>
+            </div>
+            <p className="text-xs" style={{ color: '#7A7A7A' }}>
+              Prices shown are for the current season and may change.
+            </p>
+          </div>
+
+          {loading && <p className="text-sm" style={{ color: '#7A7A7A' }}>Loading locations...</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
+
+          {!loading && !error && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+              {sortedLocations.map((location) => (
+                <Link
+                  key={location.id}
+                  to={`/locations/${location.id}`}
+                  className="group flex flex-col bg-white rounded-2xl border overflow-hidden hover:shadow-lg transition-shadow"
+                  style={{ borderColor: CARD_BORDER }}
+                >
+                  {location.image_url && (
+                    <div className="h-40 md:h-44 overflow-hidden">
+                      <img
+                        src={location.image_url}
+                        alt={location.name}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5 md:p-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg md:text-xl font-extrabold uppercase" style={headingStyle()}>
+                        {location.name}
+                      </h3>
+                      <span className="text-sm" style={{ color: RED }}>→</span>
+                    </div>
+                    {location.description && (
+                      <p className="mt-3 text-sm leading-relaxed" style={{ color: '#6A6A6A' }}>{location.description}</p>
+                    )}
+                    <p className="mt-3 text-sm">
+                      {location.starting_price != null ? (
+                        <>
+                          <span className="font-bold" style={{ color: RED }}>
+                            KES {location.starting_price.toLocaleString()}
+                          </span>{' '}
+                          <span style={{ color: '#6A6A6A' }}>/ night and up</span>
+                        </>
+                      ) : (
+                        <span className="font-bold" style={{ color: RED }}>See units</span>
+                      )}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section id="how" className="max-w-6xl mx-auto px-5 md:px-8 py-12 md:py-16">
+        <h2 className="text-3xl md:text-4xl font-extrabold uppercase mb-6" style={headingStyle()}>How it works</h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+          {STEPS.map((step) => (
+            <div
+              key={step.n}
+              className="bg-white rounded-xl border p-5 md:p-6"
+              style={{ borderColor: CARD_BORDER }}
+            >
+              <p className="text-3xl font-extrabold mb-4" style={{ fontFamily: HEADING_FONT, color: RED }}>
+                {step.n}
+              </p>
+              <p className="text-base font-bold mb-2" style={{ color: INK }}>{step.title}</p>
+              <p className="text-sm leading-relaxed" style={{ color: '#6A6A6A' }}>{step.body}</p>
+            </div>
+          ))}
+        </div>
+
+        <div
+          className="mt-8 rounded-xl p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6"
+          style={{ background: '#14100E' }}
+        >
+          <div>
+            <h3
+              className="text-xl md:text-2xl font-extrabold uppercase"
+              style={{ fontFamily: HEADING_FONT, letterSpacing: '-0.015em', color: '#FFFFFF' }}
+            >
+              Pay straight to YoungTaks — no apps, no cards.
+            </h3>
+            <p className="mt-2 text-sm" style={{ color: '#D6D3CE' }}>
+              Send Money {PHONE_DISPLAY} ({PAYEE_NAME}) or Paybill {PAYBILL}, Account {PAYBILL_ACCOUNT}.
+            </p>
+          </div>
+          <a href="#locations" className="inline-block self-start md:self-center text-sm font-semibold text-white px-6 py-3 rounded-md whitespace-nowrap" style={{ background: RED }}>Start booking</a>
+        </div>
+      </section>
+
+      <footer style={{ background: '#0B0B0B' }}>
+        <div className="max-w-6xl mx-auto px-5 md:px-8 py-10">
+          <div className="flex items-center gap-3 mb-2">
+            <img src={logo} alt="" className="h-9 w-auto object-contain" />
+            <p
+              className="text-lg md:text-xl font-extrabold uppercase"
+              style={{ fontFamily: HEADING_FONT, color: '#FFFFFF', letterSpacing: '0.01em' }}
+            >
+              YOUNGTAKS <span style={{ color: RED }}>BNBS</span>
+            </p>
+          </div>
+          <p className="text-sm mb-8" style={{ color: '#D6D3CE' }}>Your Trusted Booking Partner</p>
+
+          <div className="grid sm:grid-cols-2 gap-8 text-sm">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#8A8A8A' }}>
+                Pay via M-Pesa
+              </p>
+              <p style={{ color: '#E5E5E5' }}>Send Money: {PHONE_DISPLAY} — {PAYEE_NAME}</p>
+              <p style={{ color: '#E5E5E5' }}>Paybill: {PAYBILL} · Account: {PAYBILL_ACCOUNT}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#8A8A8A' }}>
+                Talk to us
+              </p>
+              <p style={{ color: '#E5E5E5' }}>{PHONE_DISPLAY}</p>
+              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="font-semibold" style={{ color: RED }}>
+                Message us on WhatsApp →
+              </a>
+            </div>
+          </div>
+
+          <p className="text-[11px] mt-8" style={{ color: '#6A6A6A' }}>
+            Prices shown are for the current season and may change. · © 2026 YoungTaks BNBs
+          </p>
+        </div>
+      </footer>
+    </div>
+  )
+}

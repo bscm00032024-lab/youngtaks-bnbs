@@ -126,3 +126,47 @@ export async function approveBooking(
   if (error) throw error
   return data as Booking
 }
+
+export async function getAllLocationsAdmin(): Promise<Location[]> {
+  const { data, error } = await supabase
+    .from('locations')
+    .select('*')
+    .order('name')
+
+  if (error) throw error
+  return (data ?? []) as Location[]
+}
+
+export async function createLocation(location: {
+  name: string
+  description: string | null
+}): Promise<Location> {
+  const { data, error } = await supabase
+    .from('locations')
+    .insert({ name: location.name, description: location.description, active: true })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as Location
+}
+
+export async function updateLocation(
+  id: string,
+  updates: { name?: string; description?: string | null; active?: boolean }
+): Promise<Location> {
+  const { data, error } = await supabase
+    .from('locations')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as Location
+}
+
+export async function deleteLocation(id: string): Promise<void> {
+  const { error } = await supabase.from('locations').delete().eq('id', id)
+  if (error) throw error
+}

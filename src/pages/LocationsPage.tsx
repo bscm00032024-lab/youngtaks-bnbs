@@ -110,18 +110,39 @@ export default function LocationsPage() {
     <div className="min-h-screen" style={{ fontFamily: BODY_FONT, background: '#FBFAF6' }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');`}</style>
 
-      <nav className="bg-white border-b" style={{ borderColor: '#EFEFEF' }}>
+      <nav style={{ background: '#0B0B0B' }}>
         <div className="max-w-6xl mx-auto flex items-center justify-between px-5 md:px-8 py-4">
           <a href="/" className="flex items-center gap-3">
-            <img src={logo} alt="YoungTaks BNBs" className="h-16 md:h-20 w-auto" />
+            <img src={logo} alt="YoungTaks BNBs" className="h-14 md:h-16 w-auto" />
             <div>
-              <p className="text-lg md:text-2xl font-extrabold leading-tight" style={headingStyle()}>YoungTaks BNBs</p>
-              <p className="text-xs md:text-sm font-medium leading-tight" style={{ color: RED }}>Your Trusted Booking Partner</p>
+              <p
+                className="text-lg md:text-2xl font-extrabold leading-tight uppercase"
+                style={{ ...headingStyle('#FFFFFF') }}
+              >
+                YoungTaks <span style={{ color: RED }}>BNBs</span>
+              </p>
+              <p className="text-xs md:text-sm font-medium leading-tight" style={{ color: RED }}>
+                Your Trusted Booking Partner
+              </p>
             </div>
           </a>
+
+          <div
+            className="hidden md:block text-xs font-bold tracking-wider uppercase"
+            style={{ color: '#8A8A8A' }}
+          >
+            {HERO_AREAS}
+          </div>
+
           <div className="flex items-center gap-4">
-            <a href="/admin/login" className="text-xs md:text-sm" style={{ color: '#9A9A9A' }}>Admin</a>
-            <a href="#locations" className="text-xs md:text-sm font-semibold text-white px-5 py-2.5 rounded-full" style={{ background: RED }}>Book a stay</a>
+            <a href="/admin/login" className="text-xs md:text-sm" style={{ color: '#8A8A8A' }}>Admin</a>
+            
+              href="#locations"
+              className="text-xs md:text-sm font-semibold text-white px-5 py-2.5 rounded-full"
+              style={{ background: RED }}
+            >
+              Book a stay
+            </a>
           </div>
         </div>
       </nav>

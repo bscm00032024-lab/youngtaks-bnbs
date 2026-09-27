@@ -9,7 +9,7 @@ export async function getActiveLocations(): Promise<Location[]> {
     .order('name')
 
   if (error) throw error
-  return data ?? []
+  return (data ?? []) as Location[]
 }
 
 export async function getLocationById(id: string): Promise<Location | null> {
@@ -20,7 +20,7 @@ export async function getLocationById(id: string): Promise<Location | null> {
     .single()
 
   if (error) return null
-  return data
+  return data as Location
 }
 
 export async function getUnitsByLocation(locationId: string): Promise<Unit[]> {
@@ -31,7 +31,7 @@ export async function getUnitsByLocation(locationId: string): Promise<Unit[]> {
     .order('price')
 
   if (error) throw error
-  return data ?? []
+  return (data ?? []) as Unit[]
 }
 
 export async function getUnitById(id: string): Promise<Unit | null> {
@@ -42,7 +42,7 @@ export async function getUnitById(id: string): Promise<Unit | null> {
     .single()
 
   if (error) return null
-  return data
+  return data as Unit
 }
 
 export async function createBooking(booking: {
@@ -70,7 +70,7 @@ export async function createBooking(booking: {
     .single()
 
   if (error) throw error
-  return data
+  return data as Booking
 }
 
 export async function submitMpesaCode(bookingId: string, mpesaCode: string): Promise<Booking> {
@@ -82,7 +82,7 @@ export async function submitMpesaCode(bookingId: string, mpesaCode: string): Pro
     .single()
 
   if (error) throw error
-  return data
+  return data as Booking
 }
 
 export async function getBookingById(id: string): Promise<Booking | null> {
@@ -93,5 +93,5 @@ export async function getBookingById(id: string): Promise<Booking | null> {
     .single()
 
   if (error) return null
-  return data
+  return data as Booking
 }

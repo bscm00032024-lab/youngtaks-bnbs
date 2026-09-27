@@ -6,6 +6,7 @@ export interface Location {
   name: string
   description: string | null
   active: boolean
+  image_url: string | null
   created_at: string
 }
 
@@ -52,7 +53,7 @@ export interface Database {
     Tables: {
       locations: {
         Row: Location
-        Insert: Omit<Location, 'id' | 'created_at'>
+        Insert: Omit<Location, 'id' | 'created_at' | 'image_url'> & { image_url?: string | null }
         Update: Partial<Omit<Location, 'id' | 'created_at'>>
         Relationships: []
       }

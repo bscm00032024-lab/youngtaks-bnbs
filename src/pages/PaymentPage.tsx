@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { getBookingById, submitMpesaCode } from '../lib/queries'
 import type { Booking } from '../lib/database.types'
 
-const WHATSAPP_NUMBER = '254796807457' // TODO: confirm this is the right support number
+const WHATSAPP_NUMBER = '254796807457'
 
 interface PaymentState {
   total?: number
@@ -22,7 +22,6 @@ export default function PaymentPage() {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [showFallback, setShowFallback] = useState(false)
 
-  // Load the booking initially
   useEffect(() => {
     if (!bookingId) return
     getBookingById(bookingId)
@@ -30,7 +29,6 @@ export default function PaymentPage() {
       .finally(() => setLoading(false))
   }, [bookingId])
 
-  // Subscribe to live updates once payment has been submitted
   useEffect(() => {
     if (!bookingId) return
     if (!booking || booking.status === 'pending_payment') return
@@ -56,7 +54,6 @@ export default function PaymentPage() {
     }
   }, [bookingId, booking?.status])
 
-  // 3-minute fallback timer, starts once payment_submitted
   useEffect(() => {
     if (booking?.status !== 'payment_submitted') return
     const timer = setTimeout(() => setShowFallback(true), 3 * 60 * 1000)
@@ -78,10 +75,14 @@ export default function PaymentPage() {
     }
   }
 
-  if (loading) return <p className="p-4 text-gray-500">Loading...</p>
-  if (!booking) return <p className="p-4 text-red-600">Booking not found.</p>
+  if (loading) {
+    return <p className="p-4 text-gray-500">Loading...</p>
+  }
 
-  // Step 1: waiting for M-Pesa code
+  if (!booking) {
+    return <p className="p-4 text-red-600">Booking not found.</p>
+  }
+
   if (booking.status === 'pending_payment') {
     return (
       <div className="p-4 max-w-md">
@@ -94,7 +95,7 @@ export default function PaymentPage() {
 
         <div className="border border-gray-200 rounded-lg p-4 space-y-2 text-sm">
           <p>
-            <span className="font-semibold">Send Money:</span> 0796807457 — Siwa Benson Ogilo
+            <span className="font-semibold">Send Money:</span> 0796807457, Siwa Benson Ogilo
           </p>
           <p>
             <span className="font-semibold">Paybill:</span> 247247
@@ -121,35 +122,34 @@ export default function PaymentPage() {
             disabled={submitting}
             className="w-full bg-brand-red text-white font-semibold py-2 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {submitting ? 'Submitting...' : "I've paid — submit code"}
+            {submitting ? 'Submitting...' : 'Paid — submit code'}
           </button>
         </form>
       </div>
     )
   }
 
-  // Step 2: waiting for approval
   if (booking.status === 'payment_submitted') {
     return (
       <div className="p-4 max-w-md">
         <h2 className="text-lg font-semibold mb-2">Confirming your payment...</h2>
         <p className="text-gray-500 text-sm">
-          We're checking your M-Pesa code against our records. This usually only takes a
-          moment — hang tight.
+          We are checking your M-Pesa code against our records. This usually only takes a
+          moment, hang tight.
         </p>
         <div className="mt-6 flex justify-center">
           <div className="h-8 w-8 border-4 border-gray-200 border-t-brand-red rounded-full animate-spin" />
         </div>
         {showFallback && (
           <p className="text-sm text-gray-600 mt-6 text-center">
-            Taking a little longer than usual?{' '}
+            Taking a little longer than usual? Message us directly on{' '}
             
               href={`https://wa.me/${WHATSAPP_NUMBER}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-brand-red font-semibold hover:underline"
             >
-              Message us directly on WhatsApp
+              WhatsApp
             </a>
           </p>
         )}
@@ -157,12 +157,11 @@ export default function PaymentPage() {
     )
   }
 
-  // Step 3: confirmed — show check-in details
   return (
     <div className="p-4 max-w-md">
       <h2 className="text-lg font-semibold text-brand-red mb-1">Booking confirmed!</h2>
       <p className="text-sm text-gray-500 mb-4">
-        Here are your check-in details. We've also sent these to your phone via WhatsApp.
+        Here are your check-in details. We have also sent these to your phone via WhatsApp.
       </p>
       <div className="border border-gray-200 rounded-lg p-4 space-y-3 text-sm">
         {booking.location_pin && (
@@ -181,7 +180,17 @@ export default function PaymentPage() {
           </p>
         )}
         <p>
-          <span className="font-semibold">Need help?</span>{' '}
+          <span className="font-semibold">Need help?</span> Message us on{' '}
           
             href={`https://wa.me/${WHATSAPP_NUMBER}`}
             target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-red hover:underline"
+          >
+            WhatsApp
+          </a>
+        </p>
+      </div>
+    </div>
+  )
+}

@@ -60,7 +60,6 @@ export default function LocationsPage() {
 
     getSiteSettings().then(setSiteSettings)
 
-    // Same session check RequireAuth uses: only a logged-in admin sees upload controls.
     supabase.auth.getSession().then(({ data }) => setSession(data.session))
     const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession)
@@ -111,7 +110,6 @@ export default function LocationsPage() {
     <div className="min-h-screen" style={{ fontFamily: BODY_FONT, background: '#FBFAF6' }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');`}</style>
 
-      {/* Nav */}
       <nav className="bg-white border-b" style={{ borderColor: '#EFEFEF' }}>
         <div className="max-w-6xl mx-auto flex items-center justify-between px-5 md:px-8 py-4">
           <a href="/" className="flex items-center gap-3">
@@ -128,7 +126,6 @@ export default function LocationsPage() {
         </div>
       </nav>
 
-      {/* Hero */}
       <section className="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-16 grid md:grid-cols-2 gap-10 items-center">
         <div>
           <h1
@@ -165,7 +162,6 @@ export default function LocationsPage() {
           </ul>
         </div>
 
-        {/* Hero media: everyone sees it; upload/remove controls only for a logged-in admin */}
         <div>
           <div
             className="relative rounded-2xl h-64 md:h-96 overflow-hidden shadow-2xl"
@@ -218,7 +214,6 @@ export default function LocationsPage() {
         </div>
       </section>
 
-      {/* Where to */}
       <section id="locations" style={{ background: '#F3F1EC' }}>
         <div className="max-w-6xl mx-auto px-5 md:px-8 py-12 md:py-16">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-8">
@@ -285,7 +280,6 @@ export default function LocationsPage() {
         </div>
       </section>
 
-      {/* How it works + payment banner */}
       <section id="how" className="max-w-6xl mx-auto px-5 md:px-8 py-12 md:py-16">
         <h2 className="text-3xl md:text-4xl font-extrabold uppercase mb-6" style={headingStyle()}>How it works</h2>
 
@@ -305,7 +299,6 @@ export default function LocationsPage() {
           ))}
         </div>
 
-        {/* Payment banner */}
         <div
           className="mt-8 rounded-xl p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6"
           style={{ background: '#14100E' }}
@@ -321,17 +314,10 @@ export default function LocationsPage() {
               Send Money {PHONE_DISPLAY} ({PAYEE_NAME}) or Paybill {PAYBILL}, Account {PAYBILL_ACCOUNT}.
             </p>
           </div>
-          
-            href="#locations"
-            className="inline-block self-start md:self-center text-sm font-semibold text-white px-6 py-3 rounded-md whitespace-nowrap"
-            style={{ background: RED }}
-          >
-            Start booking
-          </a>
+          <a href="#locations" className="inline-block self-start md:self-center text-sm font-semibold text-white px-6 py-3 rounded-md whitespace-nowrap" style={{ background: RED }}>Start booking</a>
         </div>
       </section>
 
-      {/* Footer */}
       <footer style={{ background: '#0B0B0B' }}>
         <div className="max-w-6xl mx-auto px-5 md:px-8 py-10">
           <p className="text-base font-extrabold" style={{ fontFamily: HEADING_FONT, color: '#FFFFFF' }}>YoungTaks BNBs</p>

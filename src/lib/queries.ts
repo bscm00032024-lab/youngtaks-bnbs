@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { Location, Unit, Booking } from './database.types'
+import type { Location, Unit, Booking, UnitType } from './database.types'
 
 export async function getActiveLocations(): Promise<Location[]> {
   const { data, error } = await supabase
@@ -169,4 +169,82 @@ export async function updateLocation(
 export async function deleteLocation(id: string): Promise<void> {
   const { error } = await supabase.from('locations').delete().eq('id', id)
   if (error) throw error
+}
+
+export interface UnitWithLocation extends Unit {
+  location: Location | null
+}
+
+export async function getAllUnitsAdmin(): Promise<UnitWithLocation[]> {
+  const { data, error } = await supabase
+    .from('units')
+    .select('*, location:locations(*)')
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []) as unknown as UnitWithLocation[]
+}
+
+export async function createUnit(unit: {
+  location_id: string
+  type: UnitType
+  price: number
+  amenities: string[]
+  description: string | null
+}): Promise<Unit> {
+  const { data, error } = await supabase
+    .from('units')
+    .insert({
+      location_id: unit.location_id,
+      type: unit.type,
+      price: unit.price,
+      amenities: unit.amenities,
+      description: unit.description,
+      photos: [],
+      videos: [],
+    })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as Unit
+}
+
+export async function updateUnit(
+  id: string,
+  updates: Partial<{
+    location_id: string
+    type: UnitType
+    price: number
+    amenities: string[]
+    description: string | null
+    photos: string[]
+    videos: string[]
+  }>
+): Promise<Unit> {
+  const { data, error } = await supabase
+    .from('units')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as Unit
+}
+
+export async function deleteUnit(id: string): Promise<void> {
+  const { error } = await supabase.from('units').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function uploadUnitMedia(file: File, unitId: string): Promise<string> {
+  const fileExt = file.name.split('.').pop()
+  const fileName = unitId + '/' + Date.now() + '-' + Math.random().toString(36).slice(2) + '.' + fileExt
+
+  const { error } = await supabase.storage.from('unit-media').upload(fileName, file)
+  if (error) throw error
+
+  const { data } = supabase.storage.from('unit-media').getPublicUrl(fileName)
+  return data.publicUrl
 }

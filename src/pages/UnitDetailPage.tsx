@@ -46,9 +46,17 @@ export default function UnitDetailPage() {
       .finally(() => setLoading(false))
   }, [unitId])
 
-  if (loading) return <p className="p-4 text-gray-500">Loading unit...</p>
-  if (error) return <p className="p-4 text-red-600">{error}</p>
-  if (!unit) return <p className="p-4 text-red-600">Unit not found.</p>
+  if (loading) {
+    return <p className="p-4 text-gray-500">Loading unit...</p>
+  }
+
+  if (error) {
+    return <p className="p-4 text-red-600">{error}</p>
+  }
+
+  if (!unit) {
+    return <p className="p-4 text-red-600">Unit not found.</p>
+  }
 
   const nights = checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 0
   const total = nights > 0 ? nights * unit.price : 0
@@ -70,10 +78,9 @@ export default function UnitDetailPage() {
       return
     }
 
-    // Booking creation happens on the next page/step — pass details via navigation state
     navigate('/booking/confirm', {
       state: {
-        unitId: unit.id,
+        unitId: unit!.id,
         checkIn,
         checkOut,
         customerName: customerName.trim(),
@@ -86,8 +93,8 @@ export default function UnitDetailPage() {
   return (
     <div className="p-4 max-w-md">
       {location && (
-        <Link to={`/locations/${location.id}`} className="text-sm text-brand-red hover:underline">
-          ← {location.name}
+        <Link to={'/locations/' + location.id} className="text-sm text-brand-red hover:underline">
+          {'<- '}{location.name}
         </Link>
       )}
       <h2 className="text-lg font-semibold mt-2">{TYPE_LABELS[unit.type]}</h2>
@@ -125,7 +132,7 @@ export default function UnitDetailPage() {
 
         {nights > 0 && (
           <p className="text-sm text-gray-600">
-            {nights} night{nights > 1 ? 's' : ''} × KES {unit.price.toLocaleString()} ={' '}
+            {nights} night{nights > 1 ? 's' : ''} x KES {unit.price.toLocaleString()} ={' '}
             <span className="font-semibold text-brand-black">KES {total.toLocaleString()}</span>
           </p>
         )}

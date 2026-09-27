@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { Location, Unit, Booking, UnitType } from './database.types'
+import type { Location, Unit, Booking, UnitType, BlogPost } from './database.types'
 
 export async function getActiveLocations(): Promise<Location[]> {
   const { data, error } = await supabase
@@ -247,4 +247,56 @@ export async function uploadUnitMedia(file: File, unitId: string): Promise<strin
 
   const { data } = supabase.storage.from('unit-media').getPublicUrl(fileName)
   return data.publicUrl
+}
+
+export async function getAllBlogPostsAdmin(): Promise<BlogPost[]> {
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []) as BlogPost[]
+}
+
+export async function createBlogPost(post: {
+  title: string
+  content: string
+  author: string
+  published: boolean
+}): Promise<BlogPost> {
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .insert({
+      title: post.title,
+      content: post.content,
+      author: post.author,
+      published: post.published,
+      updated_at: new Date().toISOString(),
+    })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as BlogPost
+}
+
+export async function updateBlogPost(
+  id: string,
+  updates: Partial<{ title: string; content: string; author: string; published: boolean }>
+): Promise<BlogPost> {
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as BlogPost
+}
+
+export async function deleteBlogPost(id: string): Promise<void> {
+  const { error } = await supabase.from('blog_posts').delete().eq('id', id)
+  if (error) throw error
 }

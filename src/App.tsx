@@ -16,23 +16,7 @@ import RequireAuth from './components/RequireAuth'
 function App() {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          <div className="min-h-screen bg-white text-brand-black">
-            <header className="p-4 border-b border-gray-200 flex justify-between items-start">
-              <a href="/">
-                <h1 className="text-xl font-bold">YoungTaks BNBs</h1>
-                <p className="text-sm text-gray-500">Your Trusted Booking Partner</p>
-              </a>
-              <a href="/admin/login" className="text-xs text-gray-400 hover:text-brand-red hover:underline mt-1">
-                Admin
-              </a>
-            </header>
-            <LocationsPage />
-          </div>
-        }
-      />
+      <Route path="/" element={<LocationsPage />} />
       <Route
         path="/locations/:locationId"
         element={

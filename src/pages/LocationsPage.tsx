@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { getLocationsWithStartingPrice, type LocationWithStartingPrice } from '../lib/queries'
+import {
+  getLocationsWithStartingPrice,
+  getSiteSettings,
+  uploadHeroMedia,
+  removeHeroMedia,
+  type LocationWithStartingPrice,
+  type SiteSettings,
+} from '../lib/queries'
+import { supabase } from '../lib/supabase'
+import type { Session } from '@supabase/supabase-js'
 import logo from '../assets/logo.png.png'
 
 const WHATSAPP_URL = 'https://wa.me/254796807457'
@@ -16,33 +25,59 @@ const STEPS = [
   { n: '04', title: 'Get check-in details', body: 'The moment payment is verified, your door code, WiFi and pin are released.' },
 ]
 
-// TODO: replace with your real admin/auth check (e.g. from context or a logged-in flag)
-const IS_ADMIN = true
-
-type HeroMedia = { url: string; type: 'image' | 'video' }
-
 export default function LocationsPage() {
   const [locations, setLocations] = useState<LocationWithStartingPrice[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [heroMedia, setHeroMedia] = useState<HeroMedia | null>(null)
+
+  const [session, setSession] = useState<Session | null>(null)
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null)
+  const [heroUploading, setHeroUploading] = useState(false)
 
   useEffect(() => {
     getLocationsWithStartingPrice()
       .then(setLocations)
       .catch(() => setError('Could not load locations. Please try again.'))
       .finally(() => setLoading(false))
+
+    getSiteSettings().then(setSiteSettings)
+
+    // Same session check RequireAuth uses, so only a logged-in admin sees the
+    // upload control here too — everyone else just sees the hero photo/video.
+    supabase.auth.getSession().then(({ data }) => setSession(data.session))
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession)
+    })
+    return () => listener.subscription.unsubscribe()
   }, [])
 
-  function handleHeroMediaChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const isAdmin = !!session
+
+  async function handleHeroMediaChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
-    const url = URL.createObjectURL(file)
-    const type: HeroMedia['type'] = file.type.startsWith('video') ? 'video' : 'image'
-    setHeroMedia({ url, type })
-    // NOTE: this only previews the file in the browser. To make it persist for
-    // every visitor, upload `file` to your storage/backend here and save the
-    // returned URL instead of the local blob URL.
+    setHeroUploading(true)
+    try {
+      const updated = await uploadHeroMedia(file)
+      setSiteSettings(updated)
+    } catch {
+      setError('Could not upload the hero photo/video. Please try again.')
+    } finally {
+      setHeroUploading(false)
+      e.target.value = ''
+    }
+  }
+
+  async function handleHeroMediaRemove() {
+    setHeroUploading(true)
+    try {
+      const updated = await removeHeroMedia()
+      setSiteSettings(updated)
+    } catch {
+      setError('Could not remove the hero photo/video. Please try again.')
+    } finally {
+      setHeroUploading(false)
+    }
   }
 
   return (
@@ -50,17 +85,17 @@ export default function LocationsPage() {
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap');`}</style>
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-5 md:px-10 py-2 border-b" style={{ borderColor: '#EFEFEF' }}>
+      <nav className="flex items-center justify-between px-5 md:px-10 py-4 border-b" style={{ borderColor: '#EFEFEF' }}>
         <a href="/" className="flex items-center gap-3">
-          <img src={logo} alt="YoungTaks BNBs" className="h-12 md:h-14 w-auto" />
+          <img src={logo} alt="YoungTaks BNBs" className="h-16 md:h-20 w-auto" />
           <div>
-            <p className="text-base md:text-lg font-bold leading-tight" style={{ color: '#1A1A1A' }}>YoungTaks BNBs</p>
-            <p className="text-xs md:text-sm leading-tight" style={{ color: '#D62828' }}>Your Trusted Booking Partner</p>
+            <p className="text-lg md:text-2xl font-extrabold leading-tight" style={{ color: '#1A1A1A' }}>YoungTaks BNBs</p>
+            <p className="text-xs md:text-sm font-medium leading-tight" style={{ color: '#D62828' }}>Your Trusted Booking Partner</p>
           </div>
         </a>
         <div className="flex items-center gap-4">
-          <a href="/admin/login" className="text-xs" style={{ color: '#9A9A9A' }}>Admin</a>
-          <a href="#locations" className="text-xs font-semibold text-white px-4 py-2 rounded-full" style={{ background: '#D62828' }}>Book a stay</a>
+          <a href="/admin/login" className="text-xs md:text-sm" style={{ color: '#9A9A9A' }}>Admin</a>
+          <a href="#locations" className="text-xs md:text-sm font-semibold text-white px-5 py-2.5 rounded-full" style={{ background: '#D62828' }}>Book a stay</a>
         </div>
       </nav>
 
@@ -90,16 +125,16 @@ export default function LocationsPage() {
           </ul>
         </div>
 
-        {/* Hero media / admin upload area */}
+        {/* Hero media — shown to everyone; upload/remove controls only appear when logged in as admin */}
         <div
           className="relative rounded-2xl h-64 md:h-80 overflow-hidden"
           style={{ background: 'linear-gradient(135deg, #D6282822, #F5A62322, #0F766E22)' }}
         >
-          {heroMedia ? (
-            heroMedia.type === 'video' ? (
-              <video src={heroMedia.url} className="w-full h-full object-cover" controls />
+          {siteSettings?.hero_media_url ? (
+            siteSettings.hero_media_type === 'video' ? (
+              <video src={siteSettings.hero_media_url} className="w-full h-full object-cover" controls />
             ) : (
-              <img src={heroMedia.url} className="w-full h-full object-cover" alt="Featured stay" />
+              <img src={siteSettings.hero_media_url} className="w-full h-full object-cover" alt="Featured YoungTaks stay" />
             )
           ) : (
             <div className="w-full h-full flex items-center justify-center text-xs text-center px-6" style={{ color: '#9A9A9A' }}>
@@ -107,19 +142,32 @@ export default function LocationsPage() {
             </div>
           )}
 
-          {IS_ADMIN && (
-            <label
-              className="absolute bottom-3 right-3 text-xs font-semibold text-white px-4 py-2 rounded-full cursor-pointer shadow"
-              style={{ background: '#1A1A1A' }}
-            >
-              {heroMedia ? 'Change photo/video' : 'Add photo/video'}
-              <input
-                type="file"
-                accept="image/*,video/*"
-                className="hidden"
-                onChange={handleHeroMediaChange}
-              />
-            </label>
+          {isAdmin && (
+            <div className="absolute bottom-3 right-3 flex gap-2">
+              {siteSettings?.hero_media_url && (
+                <button
+                  onClick={handleHeroMediaRemove}
+                  disabled={heroUploading}
+                  className="text-xs font-semibold text-white px-4 py-2 rounded-full shadow disabled:opacity-60"
+                  style={{ background: '#5A5A5A' }}
+                >
+                  Remove
+                </button>
+              )}
+              <label
+                className="text-xs font-semibold text-white px-4 py-2 rounded-full cursor-pointer shadow"
+                style={{ background: '#1A1A1A', opacity: heroUploading ? 0.6 : 1 }}
+              >
+                {heroUploading ? 'Uploading...' : siteSettings?.hero_media_url ? 'Change photo/video' : 'Add photo/video'}
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  className="hidden"
+                  disabled={heroUploading}
+                  onChange={handleHeroMediaChange}
+                />
+              </label>
+            </div>
           )}
         </div>
       </section>

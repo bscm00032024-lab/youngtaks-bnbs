@@ -8,6 +8,7 @@ import AdminLoginPage from './pages/admin/AdminLoginPage'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminBookingsPage from './pages/admin/AdminBookingsPage'
 import AdminLocationsPage from './pages/admin/AdminLocationsPage'
+import AdminUnitsPage from './pages/admin/AdminUnitsPage'
 import RequireAuth from './components/RequireAuth'
 
 function App() {
@@ -84,6 +85,7 @@ function App() {
         }
       />
       <Route path="/admin/login" element={<AdminLoginPage />} />
+              <Route path="units" element={<AdminUnitsPage />} />
       <Route
         path="/admin"
         element={

@@ -1,5 +1,6 @@
 import { Routes, Route, Link } from 'react-router-dom'
 import LocationsPage from './pages/LocationsPage'
+import UnitsPage from './pages/UnitsPage'
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <main>
         <Routes>
           <Route path="/" element={<LocationsPage />} />
+          <Route path="/locations/:locationId" element={<UnitsPage />} />
         </Routes>
       </main>
     </div>

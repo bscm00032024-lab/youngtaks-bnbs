@@ -95,3 +95,34 @@ export async function getBookingById(id: string): Promise<Booking | null> {
   if (error) return null
   return data as Booking
 }
+
+export interface BookingWithUnit extends Booking {
+  unit: Unit | null
+}
+
+export async function getAdminBookings(): Promise<BookingWithUnit[]> {
+  const { data, error } = await supabase
+    .from('bookings')
+    .select('*, unit:units(*)')
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []) as unknown as BookingWithUnit[]
+}
+
+export async function approveBooking(
+  bookingId: string,
+  wifiDetails: string,
+  doorCode: string,
+  locationPin: string
+): Promise<Booking> {
+  const { data, error } = await supabase.rpc('approve_booking', {
+    p_booking_id: bookingId,
+    p_wifi_details: wifiDetails,
+    p_door_code: doorCode,
+    p_location_pin: locationPin,
+  })
+
+  if (error) throw error
+  return data as Booking
+}

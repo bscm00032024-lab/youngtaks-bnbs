@@ -4,6 +4,9 @@ import UnitsPage from './pages/UnitsPage'
 import UnitDetailPage from './pages/UnitDetailPage'
 import BookingConfirmPage from './pages/BookingConfirmPage'
 import PaymentPage from './pages/PaymentPage'
+import AdminLoginPage from './pages/admin/AdminLoginPage'
+import AdminBookingsPage from './pages/admin/AdminBookingsPage'
+import RequireAuth from './components/RequireAuth'
 
 function App() {
   return (
@@ -21,6 +24,15 @@ function App() {
           <Route path="/units/:unitId" element={<UnitDetailPage />} />
           <Route path="/booking/confirm" element={<BookingConfirmPage />} />
           <Route path="/booking/:bookingId/payment" element={<PaymentPage />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route
+            path="/admin/bookings"
+            element={
+              <RequireAuth>
+                <AdminBookingsPage />
+              </RequireAuth>
+            }
+          />
         </Routes>
       </main>
     </div>

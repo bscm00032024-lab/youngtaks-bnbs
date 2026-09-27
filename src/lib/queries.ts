@@ -300,6 +300,7 @@ export async function deleteBlogPost(id: string): Promise<void> {
   const { error } = await supabase.from('blog_posts').delete().eq('id', id)
   if (error) throw error
 }
+
 export interface LocationWithStartingPrice extends Location {
   starting_price: number | null
 }
@@ -313,7 +314,13 @@ export async function getLocationsWithStartingPrice(): Promise<LocationWithStart
 
   if (error) throw error
   return (data ?? []).map((loc: any) => ({
-    export interface SiteSettings {
+    ...loc,
+    starting_price:
+      loc.units && loc.units.length > 0 ? Math.min(...loc.units.map((u: any) => u.price)) : null,
+  })) as LocationWithStartingPrice[]
+}
+
+export interface SiteSettings {
   id: string
   hero_media_url: string | null
   hero_media_type: 'image' | 'video' | null
@@ -359,9 +366,4 @@ export async function removeHeroMedia(): Promise<SiteSettings> {
 
   if (error) throw error
   return data as SiteSettings
-}
-    ...loc,
-    starting_price:
-      loc.units && loc.units.length > 0 ? Math.min(...loc.units.map((u: any) => u.price)) : null,
-  })) as LocationWithStartingPrice[]
 }

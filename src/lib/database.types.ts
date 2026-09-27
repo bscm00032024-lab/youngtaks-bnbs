@@ -53,22 +53,30 @@ export interface Database {
         Row: Location
         Insert: Omit<Location, 'id' | 'created_at'>
         Update: Partial<Omit<Location, 'id' | 'created_at'>>
+        Relationships: []
       }
       units: {
         Row: Unit
         Insert: Omit<Unit, 'id' | 'created_at'>
         Update: Partial<Omit<Unit, 'id' | 'created_at'>>
+        Relationships: []
       }
       bookings: {
         Row: Booking
         Insert: Omit<Booking, 'id' | 'created_at' | 'confirmed_at'>
         Update: Partial<Omit<Booking, 'id' | 'created_at'>>
+        Relationships: []
       }
       blog_posts: {
         Row: BlogPost
         Insert: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>
         Update: Partial<Omit<BlogPost, 'id' | 'created_at'>>
+        Relationships: []
       }
     }
+    Views: Record<string, never>
+    Functions: Record<string, never>
+    Enums: Record<string, never>
+    CompositeTypes: Record<string, never>
   }
 }

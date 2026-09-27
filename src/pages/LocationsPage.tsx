@@ -130,3 +130,112 @@ export default function LocationsPage() {
 
       {/* Hero */}
       <section className="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-16 grid md:grid-cols-2 gap-10 items-center">
+        <div>
+          <h1
+            className="text-4xl md:text-6xl font-black uppercase leading-[1.02]"
+            style={{ fontFamily: HEADING_FONT, letterSpacing: '-0.03em', color: INK }}
+          >
+            Book your stay in{' '}
+            <span className="relative inline-block" style={{ color: RED }}>
+              two minutes.
+              <span
+                className="absolute left-0 right-0 -bottom-1 h-1.5 rounded-full"
+                style={{ background: '#D6282855' }}
+              />
+            </span>
+          </h1>
+
+          <div
+            className="inline-flex items-center gap-2 px-4 py-1.5 mt-5 rounded-full border bg-white text-[11px] font-bold tracking-wider uppercase"
+            style={{ borderColor: CARD_BORDER, color: '#5A5A5A' }}
+          >
+            <span className="w-2 h-2 rounded-full" style={{ background: RED }} />
+            {HERO_AREAS}
+          </div>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a href="#locations" className="text-sm font-semibold text-white px-5 py-3 rounded-lg" style={{ background: RED }}>Find your stay</a>
+            <a href="#how" className="text-sm font-semibold px-5 py-3 rounded-lg border bg-white" style={{ borderColor: CARD_BORDER, color: INK }}>How it works</a>
+          </div>
+
+          <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs" style={{ color: '#5A5A5A' }}>
+            <li><span style={{ color: RED }}>✓</span> Check-in 10:00 AM</li>
+            <li><span style={{ color: RED }}>✓</span> Pay via M-Pesa</li>
+            <li><span style={{ color: RED }}>✓</span> WhatsApp support</li>
+          </ul>
+        </div>
+
+        {/* Hero media: everyone sees it; upload/remove controls only for a logged-in admin */}
+        <div>
+          <div
+            className="relative rounded-2xl h-64 md:h-96 overflow-hidden shadow-2xl"
+            style={{
+              background: 'linear-gradient(135deg, #D6282822, #F5A62322, #0F766E22)',
+              border: `3px solid ${INK}`,
+            }}
+          >
+            {siteSettings?.hero_media_url ? (
+              siteSettings.hero_media_type === 'video' ? (
+                <video src={siteSettings.hero_media_url} className="w-full h-full object-cover" controls />
+              ) : (
+                <img src={siteSettings.hero_media_url} className="w-full h-full object-cover" alt="Featured YoungTaks stay" />
+              )
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-xs text-center px-6" style={{ color: '#9A9A9A' }}>
+                No photo or video added yet
+              </div>
+            )}
+
+            {isAdmin && (
+              <div className="absolute bottom-3 right-3 flex gap-2">
+                {siteSettings?.hero_media_url && (
+                  <button
+                    onClick={handleHeroMediaRemove}
+                    disabled={heroUploading}
+                    className="text-xs font-semibold text-white px-4 py-2 rounded-full shadow disabled:opacity-60"
+                    style={{ background: '#5A5A5A' }}
+                  >
+                    Remove
+                  </button>
+                )}
+                <label
+                  className="text-xs font-semibold text-white px-4 py-2 rounded-full cursor-pointer shadow"
+                  style={{ background: INK, opacity: heroUploading ? 0.6 : 1 }}
+                >
+                  {heroUploading ? 'Uploading...' : siteSettings?.hero_media_url ? 'Change photo/video' : 'Add photo/video'}
+                  <input
+                    type="file"
+                    accept="image/*,video/*"
+                    className="hidden"
+                    disabled={heroUploading}
+                    onChange={handleHeroMediaChange}
+                  />
+                </label>
+              </div>
+            )}
+          </div>
+          {isAdmin && heroError && <p className="mt-2 text-xs text-red-600">{heroError}</p>}
+        </div>
+      </section>
+
+      {/* Where to */}
+      <section id="locations" style={{ background: '#F3F1EC' }}>
+        <div className="max-w-6xl mx-auto px-5 md:px-8 py-12 md:py-16">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-8">
+            <div>
+              <h2 className="text-3xl md:text-5xl font-extrabold uppercase" style={headingStyle()}>Where to?</h2>
+              <p className="mt-2 text-sm md:text-base" style={{ color: '#5A5A5A' }}>
+                {countWord} location{locations.length !== 1 ? 's' : ''} along the coast. Pick one to see every unit.
+              </p>
+            </div>
+            <p className="text-xs" style={{ color: '#7A7A7A' }}>
+              Prices shown are for the current season and may change.
+            </p>
+          </div>
+
+          {loading && <p className="text-sm" style={{ color: '#7A7A7A' }}>Loading locations...</p>}
+          {error && <p className="text-sm text-red-600">{error}</p>}
+
+          {!loading && !error && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+              {sortedLocations.map((location) => (

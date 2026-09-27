@@ -319,4 +319,62 @@ export interface LocationWithStartingPrice extends Location {
 export async function getLocationsWithStartingPrice(): Promise<LocationWithStartingPrice[]> {
   const { data, error } = await supabase
     .from('locations')
-    .select('*,
+    .select('*, units(price)')
+    .eq('active', true)
+    .order('name')
+
+  if (error) throw error
+  return (data ?? []).map((loc: any) => ({
+    ...loc,
+    starting_price:
+      loc.units && loc.units.length > 0 ? Math.min(...loc.units.map((u: any) => u.price)) : null,
+  })) as LocationWithStartingPrice[]
+}
+
+export interface SiteSettings {
+  id: string
+  hero_media_url: string | null
+  hero_media_type: 'image' | 'video' | null
+}
+
+export async function getSiteSettings(): Promise<SiteSettings | null> {
+  const { data, error } = await supabase
+    .from('site_settings')
+    .select('*')
+    .eq('id', 'main')
+    .single()
+
+  if (error) return null
+  return data as SiteSettings
+}
+
+export async function uploadHeroMedia(file: File): Promise<SiteSettings> {
+  const fileExt = file.name.split('.').pop()
+  const fileName = 'site/hero-' + Date.now() + '-' + Math.random().toString(36).slice(2) + '.' + fileExt
+
+  const { error: uploadError } = await supabase.storage.from('unit-media').upload(fileName, file)
+  if (uploadError) throw uploadError
+
+  const { data: urlData } = supabase.storage.from('unit-media').getPublicUrl(fileName)
+  const mediaType: 'image' | 'video' = file.type.startsWith('video') ? 'video' : 'image'
+
+  const { data, error } = await supabase
+    .from('site_settings')
+    .upsert({ id: 'main', hero_media_url: urlData.publicUrl, hero_media_type: mediaType })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as SiteSettings
+}
+
+export async function removeHeroMedia(): Promise<SiteSettings> {
+  const { data, error } = await supabase
+    .from('site_settings')
+    .upsert({ id: 'main', hero_media_url: null, hero_media_type: null })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data as SiteSettings
+}

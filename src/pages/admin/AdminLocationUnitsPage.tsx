@@ -1,79 +1,114 @@
 import { useEffect, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import {
-  getAllBlogPostsAdmin,
-  createBlogPost,
-  updateBlogPost,
-  deleteBlogPost,
+  getUnitsByLocation,
+  getLocationById,
+  createUnit,
+  updateUnit,
+  deleteUnit,
+  uploadUnitMedia,
 } from '../../lib/queries'
-import type { BlogPost } from '../../lib/database.types'
+import type { Location, Unit, UnitType } from '../../lib/database.types'
 
-export default function AdminBlogPage() {
-  const [posts, setPosts] = useState<BlogPost[]>([])
+const TYPE_OPTIONS: UnitType[] = ['studio', '1br', '2br', '3br', 'other']
+const TYPE_LABELS: Record<UnitType, string> = {
+  studio: 'Studio',
+  '1br': '1 Bedroom',
+  '2br': '2 Bedroom',
+  '3br': '3 Bedroom',
+  other: 'More',
+}
+
+export default function AdminLocationUnitsPage() {
+  const { locationId } = useParams<{ locationId: string }>()
+  const navigate = useNavigate()
+
+  const [location, setLocation] = useState<Location | null>(null)
+  const [units, setUnits] = useState<Unit[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const [newTitle, setNewTitle] = useState('')
-  const [newAuthor, setNewAuthor] = useState('')
-  const [newContent, setNewContent] = useState('')
+  const [newType, setNewType] = useState<UnitType>('studio')
+  const [newPrice, setNewPrice] = useState('')
+  const [newAmenities, setNewAmenities] = useState('')
+  const [newDescription, setNewDescription] = useState('')
   const [creating, setCreating] = useState(false)
 
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editTitle, setEditTitle] = useState('')
-  const [editAuthor, setEditAuthor] = useState('')
-  const [editContent, setEditContent] = useState('')
+  const [editType, setEditType] = useState<UnitType>('studio')
+  const [editPrice, setEditPrice] = useState('')
+  const [editAmenities, setEditAmenities] = useState('')
+  const [editDescription, setEditDescription] = useState('')
   const [saving, setSaving] = useState(false)
 
+  const [uploadingId, setUploadingId] = useState<string | null>(null)
+
   function load() {
+    if (!locationId) return
     setLoading(true)
-    getAllBlogPostsAdmin()
-      .then(setPosts)
-      .catch(() => setError('Could not load blog posts.'))
+    Promise.all([getUnitsByLocation(locationId), getLocationById(locationId)])
+      .then(([u, loc]) => {
+        setUnits(u)
+        setLocation(loc)
+      })
+      .catch(() => setError('Could not load units for this location.'))
       .finally(() => setLoading(false))
   }
 
   useEffect(() => {
     load()
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locationId])
 
-  async function handleCreate(e: React.FormEvent, publishNow: boolean) {
+  async function handleCreate(e: React.FormEvent) {
     e.preventDefault()
-    if (!newTitle.trim() || !newContent.trim() || !newAuthor.trim()) {
-      alert('Please fill in title, author, and content.')
+    if (!locationId) return
+    const priceNum = parseFloat(newPrice)
+    if (isNaN(priceNum)) {
+      alert('Please enter a valid price.')
       return
     }
     setCreating(true)
     try {
-      await createBlogPost({
-        title: newTitle.trim(),
-        content: newContent.trim(),
-        author: newAuthor.trim(),
-        published: publishNow,
+      await createUnit({
+        location_id: locationId,
+        type: newType,
+        price: priceNum,
+        amenities: newAmenities.split(',').map((a) => a.trim()).filter(Boolean),
+        description: newDescription.trim() || null,
       })
-      setNewTitle('')
-      setNewAuthor('')
-      setNewContent('')
+      setNewPrice('')
+      setNewAmenities('')
+      setNewDescription('')
       load()
     } catch {
-      alert('Could not create post.')
+      alert('Could not create unit.')
     } finally {
       setCreating(false)
     }
   }
 
-  function startEdit(post: BlogPost) {
-    setEditingId(post.id)
-    setEditTitle(post.title)
-    setEditAuthor(post.author)
-    setEditContent(post.content)
+  function startEdit(unit: Unit) {
+    setEditingId(unit.id)
+    setEditType(unit.type)
+    setEditPrice(String(unit.price))
+    setEditAmenities(unit.amenities.join(', '))
+    setEditDescription(unit.description ?? '')
   }
 
   async function handleSaveEdit(id: string) {
+    const priceNum = parseFloat(editPrice)
+    if (isNaN(priceNum)) {
+      alert('Please enter a valid price.')
+      return
+    }
     setSaving(true)
     try {
-      await updateBlogPost(id, {
-        title: editTitle.trim(),
-        author: editAuthor.trim(),
-        content: editContent.trim(),
+      await updateUnit(id, {
+        type: editType,
+        price: priceNum,
+        amenities: editAmenities.split(',').map((a) => a.trim()).filter(Boolean),
+        description: editDescription.trim() || null,
       })
       setEditingId(null)
       load()
@@ -84,99 +119,134 @@ export default function AdminBlogPage() {
     }
   }
 
-  async function handleTogglePublished(post: BlogPost) {
-    try {
-      await updateBlogPost(post.id, { published: !post.published })
-      load()
-    } catch {
-      alert('Could not update post.')
-    }
-  }
-
   async function handleDelete(id: string) {
-    if (!confirm('Delete this post? This cannot be undone.')) return
+    if (!confirm('Delete this unit? This cannot be undone.')) return
     try {
-      await deleteBlogPost(id)
+      await deleteUnit(id)
       load()
     } catch {
-      alert('Could not delete post.')
+      alert('Could not delete unit. It may have existing bookings.')
     }
   }
 
-  if (loading) return <p className="p-4 text-gray-500">Loading posts...</p>
+  async function handleFileUpload(unit: Unit, files: FileList | null, kind: 'photos' | 'videos') {
+    if (!files || files.length === 0) return
+    setUploadingId(unit.id)
+    try {
+      const uploadedUrls: string[] = []
+      for (const file of Array.from(files)) {
+        const url = await uploadUnitMedia(file, unit.id)
+        uploadedUrls.push(url)
+      }
+      const existing = kind === 'photos' ? unit.photos : unit.videos
+      await updateUnit(unit.id, { [kind]: [...existing, ...uploadedUrls] })
+      load()
+    } catch {
+      alert('Upload failed. Please try again.')
+    } finally {
+      setUploadingId(null)
+    }
+  }
+
+  async function handleRemoveMedia(unit: Unit, url: string, kind: 'photos' | 'videos') {
+    const existing = kind === 'photos' ? unit.photos : unit.videos
+    try {
+      await updateUnit(unit.id, { [kind]: existing.filter((u) => u !== url) })
+      load()
+    } catch {
+      alert('Could not remove media.')
+    }
+  }
+
+  if (loading) return <p className="p-4 text-gray-500">Loading units...</p>
   if (error) return <p className="p-4 text-red-600">{error}</p>
 
   return (
-    <div className="p-4 max-w-2xl">
-      <h2 className="text-lg font-semibold mb-4">Blog</h2>
+    <div className="p-4 max-w-3xl">
+      <button onClick={() => navigate('/admin/locations')} className="text-sm text-brand-red hover:underline mb-2">
+        ← Back to locations
+      </button>
+      <h2 className="text-lg font-semibold mb-1">{location?.name ?? 'Units'}</h2>
+      <p className="text-sm text-gray-500 mb-4">Managing units for this location only.</p>
 
-      <form className="border border-gray-200 rounded-lg p-4 mb-6 space-y-2">
-        <p className="font-semibold text-sm">Write a new post</p>
+      <form onSubmit={handleCreate} className="border border-gray-200 rounded-lg p-4 mb-6 space-y-2">
+        <p className="font-semibold text-sm">Add a new unit here</p>
+        <select
+          value={newType}
+          onChange={(e) => setNewType(e.target.value as UnitType)}
+          className="w-full border border-gray-300 rounded-md p-2 text-sm"
+        >
+          {TYPE_OPTIONS.map((t) => (
+            <option key={t} value={t}>{TYPE_LABELS[t]}</option>
+          ))}
+        </select>
         <input
-          type="text"
-          placeholder="Title"
-          value={newTitle}
-          onChange={(e) => setNewTitle(e.target.value)}
+          type="number"
+          placeholder="Price per night (KES)"
+          value={newPrice}
+          onChange={(e) => setNewPrice(e.target.value)}
           className="w-full border border-gray-300 rounded-md p-2 text-sm"
         />
         <input
           type="text"
-          placeholder="Author"
-          value={newAuthor}
-          onChange={(e) => setNewAuthor(e.target.value)}
+          placeholder="Amenities, comma separated"
+          value={newAmenities}
+          onChange={(e) => setNewAmenities(e.target.value)}
           className="w-full border border-gray-300 rounded-md p-2 text-sm"
         />
         <textarea
-          placeholder="Write your post here..."
-          value={newContent}
-          onChange={(e) => setNewContent(e.target.value)}
+          placeholder="Description (optional)"
+          value={newDescription}
+          onChange={(e) => setNewDescription(e.target.value)}
           className="w-full border border-gray-300 rounded-md p-2 text-sm"
-          rows={6}
+          rows={2}
         />
-        <div className="flex gap-2">
-          <button
-            onClick={(e) => handleCreate(e, false)}
-            disabled={creating}
-            className="text-sm font-semibold px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
-          >
-            Save as draft
-          </button>
-          <button
-            onClick={(e) => handleCreate(e, true)}
-            disabled={creating}
-            className="bg-brand-red text-white text-sm font-semibold px-4 py-2 rounded-md hover:opacity-90 disabled:opacity-50"
-          >
-            Publish
-          </button>
-        </div>
+        <button
+          type="submit"
+          disabled={creating}
+          className="bg-brand-red text-white text-sm font-semibold px-4 py-2 rounded-md hover:opacity-90 disabled:opacity-50"
+        >
+          {creating ? 'Adding...' : 'Add unit'}
+        </button>
       </form>
 
-      <div className="space-y-3">
-        {posts.map((post) => (
-          <div key={post.id} className="border border-gray-200 rounded-lg p-4">
-            {editingId === post.id ? (
+      {units.length === 0 && <p className="text-sm text-gray-400">No units yet for this location.</p>}
+
+      <div className="space-y-4">
+        {units.map((unit) => (
+          <div key={unit.id} className="border border-gray-200 rounded-lg p-4">
+            {editingId === unit.id ? (
               <div className="space-y-2">
+                <select
+                  value={editType}
+                  onChange={(e) => setEditType(e.target.value as UnitType)}
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                >
+                  {TYPE_OPTIONS.map((t) => (
+                    <option key={t} value={t}>{TYPE_LABELS[t]}</option>
+                  ))}
+                </select>
                 <input
-                  type="text"
-                  value={editTitle}
-                  onChange={(e) => setEditTitle(e.target.value)}
+                  type="number"
+                  value={editPrice}
+                  onChange={(e) => setEditPrice(e.target.value)}
                   className="w-full border border-gray-300 rounded-md p-2 text-sm"
                 />
                 <input
                   type="text"
-                  value={editAuthor}
-                  onChange={(e) => setEditAuthor(e.target.value)}
+                  value={editAmenities}
+                  onChange={(e) => setEditAmenities(e.target.value)}
                   className="w-full border border-gray-300 rounded-md p-2 text-sm"
                 />
                 <textarea
-                  value={editContent}
-                  onChange={(e) => setEditContent(e.target.value)}
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
                   className="w-full border border-gray-300 rounded-md p-2 text-sm"
-                  rows={6}
+                  rows={2}
                 />
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleSaveEdit(post.id)}
+                    onClick={() => handleSaveEdit(unit.id)}
                     disabled={saving}
                     className="bg-brand-red text-white text-sm font-semibold px-3 py-1.5 rounded-md hover:opacity-90"
                   >
@@ -188,35 +258,73 @@ export default function AdminBlogPage() {
                 </div>
               </div>
             ) : (
-              <>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-semibold">{post.title}</p>
-                    <p className="text-xs text-gray-400">by {post.author}</p>
-                  </div>
-                  <span
-                    className={
-                      'text-xs font-semibold px-2 py-0.5 rounded ' +
-                      (post.published ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600')
-                    }
-                  >
-                    {post.published ? 'Published' : 'Draft'}
-                  </span>
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-semibold">{TYPE_LABELS[unit.type]}</p>
+                  <p className="text-brand-red font-semibold text-sm">KES {unit.price.toLocaleString()} / night</p>
+                  {unit.description && <p className="text-sm text-gray-500 mt-1">{unit.description}</p>}
+                  {unit.amenities.length > 0 && (
+                    <p className="text-xs text-gray-400 mt-1">{unit.amenities.join(', ')}</p>
+                  )}
                 </div>
-                <p className="text-sm text-gray-600 mt-2 line-clamp-3">{post.content}</p>
-                <div className="flex gap-3 text-sm mt-2">
-                  <button onClick={() => startEdit(post)} className="text-brand-red hover:underline">
-                    Edit
-                  </button>
-                  <button onClick={() => handleTogglePublished(post)} className="text-gray-500 hover:underline">
-                    {post.published ? 'Unpublish' : 'Publish'}
-                  </button>
-                  <button onClick={() => handleDelete(post.id)} className="text-gray-400 hover:underline">
-                    Delete
-                  </button>
+                <div className="flex gap-3 text-sm">
+                  <button onClick={() => startEdit(unit)} className="text-brand-red hover:underline">Edit</button>
+                  <button onClick={() => handleDelete(unit.id)} className="text-gray-400 hover:underline">Delete</button>
                 </div>
-              </>
+              </div>
             )}
+
+            <div className="mt-3 border-t border-gray-100 pt-3">
+              <p className="text-xs font-semibold text-gray-500 mb-1">Photos</p>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {unit.photos.map((url) => (
+                  <div key={url} className="relative">
+                    <img src={url} alt="" className="h-16 w-16 object-cover rounded-md" />
+                    <button
+                      onClick={() => handleRemoveMedia(unit, url, 'photos')}
+                      className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full h-4 w-4 flex items-center justify-center"
+                    >
+                      x
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                disabled={uploadingId === unit.id}
+                onChange={(e) => handleFileUpload(unit, e.target.files, 'photos')}
+                className="text-xs"
+              />
+            </div>
+
+            <div className="mt-3 border-t border-gray-100 pt-3">
+              <p className="text-xs font-semibold text-gray-500 mb-1">Videos</p>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {unit.videos.map((url) => (
+                  <div key={url} className="relative">
+                    <video src={url} className="h-16 w-24 object-cover rounded-md" />
+                    <button
+                      onClick={() => handleRemoveMedia(unit, url, 'videos')}
+                      className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full h-4 w-4 flex items-center justify-center"
+                    >
+                      x
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <input
+                type="file"
+                accept="video/*"
+                multiple
+                disabled={uploadingId === unit.id}
+                onChange={(e) => handleFileUpload(unit, e.target.files, 'videos')}
+                className="text-xs"
+              />
+            </div>
+
+            {uploadingId === unit.id && <p className="text-xs text-gray-400 mt-2">Uploading...</p>}
           </div>
         ))}
       </div>

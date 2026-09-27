@@ -1,5 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import LocationsPage from './pages/LocationsPage'
+<Route path="locations" element={<AdminLocationsPage />} />
+<Route path="locations/:locationId/units" element={<AdminLocationUnitsPage />} />
 import UnitsPage from './pages/UnitsPage'
 import UnitDetailPage from './pages/UnitDetailPage'
 import BookingConfirmPage from './pages/BookingConfirmPage'

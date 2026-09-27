@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase'
 import { getBookingById, submitMpesaCode } from '../lib/queries'
 import type { Booking } from '../lib/database.types'
 
-const WHATSAPP_NUMBER = '254796807457'
+const WHATSAPP_LINK = 'https://wa.me/254796807457'
 
 interface PaymentState {
   total?: number
@@ -34,14 +34,14 @@ export default function PaymentPage() {
     if (!booking || booking.status === 'pending_payment') return
 
     const channel = supabase
-      .channel(`booking-${bookingId}`)
+      .channel('booking-' + bookingId)
       .on(
         'postgres_changes',
         {
           event: 'UPDATE',
           schema: 'public',
           table: 'bookings',
-          filter: `id=eq.${bookingId}`,
+          filter: 'id=eq.' + bookingId,
         },
         (payload) => {
           setBooking(payload.new as Booking)
@@ -94,15 +94,9 @@ export default function PaymentPage() {
         )}
 
         <div className="border border-gray-200 rounded-lg p-4 space-y-2 text-sm">
-          <p>
-            <span className="font-semibold">Send Money:</span> 0796807457, Siwa Benson Ogilo
-          </p>
-          <p>
-            <span className="font-semibold">Paybill:</span> 247247
-          </p>
-          <p>
-            <span className="font-semibold">Account:</span> 1180177539458
-          </p>
+          <p><span className="font-semibold">Send Money:</span> 0796807457, Siwa Benson Ogilo</p>
+          <p><span className="font-semibold">Paybill:</span> 247247</p>
+          <p><span className="font-semibold">Account:</span> 1180177539458</p>
         </div>
 
         <form onSubmit={handleSubmitCode} className="mt-6 space-y-3">
@@ -122,7 +116,7 @@ export default function PaymentPage() {
             disabled={submitting}
             className="w-full bg-brand-red text-white font-semibold py-2 rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {submitting ? 'Submitting...' : 'Paid — submit code'}
+            {submitting ? 'Submitting...' : 'Paid, submit code'}
           </button>
         </form>
       </div>
@@ -134,23 +128,15 @@ export default function PaymentPage() {
       <div className="p-4 max-w-md">
         <h2 className="text-lg font-semibold mb-2">Confirming your payment...</h2>
         <p className="text-gray-500 text-sm">
-          We are checking your M-Pesa code against our records. This usually only takes a
-          moment, hang tight.
+          We are checking your M-Pesa code against our records. This usually only takes a moment, hang tight.
         </p>
         <div className="mt-6 flex justify-center">
-          <div className="h-8 w-8 border-4 border-gray-200 border-t-brand-red rounded-full animate-spin" />
+          <div className="h-8 w-8 border-4 border-gray-200 border-t-brand-red rounded-full animate-spin"></div>
         </div>
         {showFallback && (
           <p className="text-sm text-gray-600 mt-6 text-center">
-            Taking a little longer than usual? Message us directly on{' '}
-            
-              href={`https://wa.me/${WHATSAPP_NUMBER}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-brand-red font-semibold hover:underline"
-            >
-              WhatsApp
-            </a>
+            Taking a little longer than usual? Message us directly on WhatsApp:{' '}
+            <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="text-brand-red font-semibold hover:underline">Chat now</a>
           </p>
         )}
       </div>
@@ -165,30 +151,17 @@ export default function PaymentPage() {
       </p>
       <div className="border border-gray-200 rounded-lg p-4 space-y-3 text-sm">
         {booking.location_pin && (
-          <p>
-            <span className="font-semibold">Location:</span> {booking.location_pin}
-          </p>
+          <p><span className="font-semibold">Location:</span> {booking.location_pin}</p>
         )}
         {booking.wifi_details && (
-          <p>
-            <span className="font-semibold">WiFi:</span> {booking.wifi_details}
-          </p>
+          <p><span className="font-semibold">WiFi:</span> {booking.wifi_details}</p>
         )}
         {booking.door_code && (
-          <p>
-            <span className="font-semibold">Door code:</span> {booking.door_code}
-          </p>
+          <p><span className="font-semibold">Door code:</span> {booking.door_code}</p>
         )}
         <p>
-          <span className="font-semibold">Need help?</span> Message us on{' '}
-          
-            href={`https://wa.me/${WHATSAPP_NUMBER}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-brand-red hover:underline"
-          >
-            WhatsApp
-          </a>
+          <span className="font-semibold">Need help?</span>{' '}
+          <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer" className="text-brand-red hover:underline">Message us on WhatsApp</a>
         </p>
       </div>
     </div>

@@ -115,58 +115,33 @@ export default function LocationsPage() {
           <a href="/" className="flex items-center gap-3">
             <img src={logo} alt="YoungTaks BNBs" className="h-14 md:h-16 w-auto" />
             <div>
-              <p
-                className="text-lg md:text-2xl font-extrabold leading-tight uppercase"
-                style={{ ...headingStyle('#FFFFFF') }}
-              >
+              <p className="text-lg md:text-2xl font-extrabold leading-tight uppercase" style={{ ...headingStyle('#FFFFFF') }}>
                 YoungTaks <span style={{ color: RED }}>BNBs</span>
               </p>
-              <p className="text-xs md:text-sm font-medium leading-tight" style={{ color: RED }}>
-                Your Trusted Booking Partner
-              </p>
+              <p className="text-xs md:text-sm font-medium leading-tight" style={{ color: RED }}>Your Trusted Booking Partner</p>
             </div>
           </a>
 
-          <div
-            className="hidden md:block text-xs font-bold tracking-wider uppercase"
-            style={{ color: '#8A8A8A' }}
-          >
-            {HERO_AREAS}
-          </div>
+          <div className="hidden md:block text-xs font-bold tracking-wider uppercase" style={{ color: '#8A8A8A' }}>{HERO_AREAS}</div>
 
           <div className="flex items-center gap-4">
             <a href="/admin/login" className="text-xs md:text-sm" style={{ color: '#8A8A8A' }}>Admin</a>
-            
-              href="#locations"
-              className="text-xs md:text-sm font-semibold text-white px-5 py-2.5 rounded-full"
-              style={{ background: RED }}
-            >
-              Book a stay
-            </a>
+            <a href="#locations" className="text-xs md:text-sm font-semibold text-white px-5 py-2.5 rounded-full" style={{ background: RED }}>Book a stay</a>
           </div>
         </div>
       </nav>
 
       <section className="max-w-6xl mx-auto px-5 md:px-8 py-10 md:py-16 grid md:grid-cols-2 gap-10 items-center">
         <div>
-          <h1
-            className="text-4xl md:text-6xl font-black uppercase leading-[1.02]"
-            style={{ fontFamily: HEADING_FONT, letterSpacing: '-0.03em', color: INK }}
-          >
+          <h1 className="text-4xl md:text-6xl font-black uppercase leading-[1.02]" style={{ fontFamily: HEADING_FONT, letterSpacing: '-0.03em', color: INK }}>
             Book your stay in{' '}
             <span className="relative inline-block" style={{ color: RED }}>
               two minutes.
-              <span
-                className="absolute left-0 right-0 -bottom-1 h-1.5 rounded-full"
-                style={{ background: '#D6282855' }}
-              />
+              <span className="absolute left-0 right-0 -bottom-1 h-1.5 rounded-full" style={{ background: '#D6282855' }} />
             </span>
           </h1>
 
-          <div
-            className="inline-flex items-center gap-2 px-4 py-1.5 mt-5 rounded-full border bg-white text-[11px] font-bold tracking-wider uppercase"
-            style={{ borderColor: CARD_BORDER, color: '#5A5A5A' }}
-          >
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 mt-5 rounded-full border bg-white text-[11px] font-bold tracking-wider uppercase" style={{ borderColor: CARD_BORDER, color: '#5A5A5A' }}>
             <span className="w-2 h-2 rounded-full" style={{ background: RED }} />
             {HERO_AREAS}
           </div>
@@ -206,27 +181,13 @@ export default function LocationsPage() {
             {isAdmin && (
               <div className="absolute bottom-3 right-3 flex gap-2">
                 {siteSettings?.hero_media_url && (
-                  <button
-                    onClick={handleHeroMediaRemove}
-                    disabled={heroUploading}
-                    className="text-xs font-semibold text-white px-4 py-2 rounded-full shadow disabled:opacity-60"
-                    style={{ background: '#5A5A5A' }}
-                  >
+                  <button onClick={handleHeroMediaRemove} disabled={heroUploading} className="text-xs font-semibold text-white px-4 py-2 rounded-full shadow disabled:opacity-60" style={{ background: '#5A5A5A' }}>
                     Remove
                   </button>
                 )}
-                <label
-                  className="text-xs font-semibold text-white px-4 py-2 rounded-full cursor-pointer shadow"
-                  style={{ background: INK, opacity: heroUploading ? 0.6 : 1 }}
-                >
+                <label className="text-xs font-semibold text-white px-4 py-2 rounded-full cursor-pointer shadow" style={{ background: INK, opacity: heroUploading ? 0.6 : 1 }}>
                   {heroUploading ? 'Uploading...' : siteSettings?.hero_media_url ? 'Change photo/video' : 'Add photo/video'}
-                  <input
-                    type="file"
-                    accept="image/*,video/*"
-                    className="hidden"
-                    disabled={heroUploading}
-                    onChange={handleHeroMediaChange}
-                  />
+                  <input type="file" accept="image/*,video/*" className="hidden" disabled={heroUploading} onChange={handleHeroMediaChange} />
                 </label>
               </div>
             )}
@@ -244,9 +205,7 @@ export default function LocationsPage() {
                 {countWord} location{locations.length !== 1 ? 's' : ''} along the coast. Pick one to see every unit.
               </p>
             </div>
-            <p className="text-xs" style={{ color: '#7A7A7A' }}>
-              Prices shown are for the current season and may change.
-            </p>
+            <p className="text-xs" style={{ color: '#7A7A7A' }}>Prices shown are for the current season and may change.</p>
           </div>
 
           {loading && <p className="text-sm" style={{ color: '#7A7A7A' }}>Loading locations...</p>}
@@ -255,27 +214,15 @@ export default function LocationsPage() {
           {!loading && !error && (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
               {sortedLocations.map((location) => (
-                <Link
-                  key={location.id}
-                  to={`/locations/${location.id}`}
-                  className="group flex flex-col bg-white rounded-2xl border overflow-hidden hover:shadow-lg transition-shadow"
-                  style={{ borderColor: CARD_BORDER }}
-                >
+                <Link key={location.id} to={`/locations/${location.id}`} className="group flex flex-col bg-white rounded-2xl border overflow-hidden hover:shadow-lg transition-shadow" style={{ borderColor: CARD_BORDER }}>
                   {location.image_url && (
                     <div className="h-40 md:h-44 overflow-hidden">
-                      <img
-                        src={location.image_url}
-                        alt={location.name}
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
+                      <img src={location.image_url} alt={location.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     </div>
                   )}
                   <div className="p-5 md:p-6">
                     <div className="flex items-center justify-between">
-                      <h3 className="text-lg md:text-xl font-extrabold uppercase" style={headingStyle()}>
-                        {location.name}
-                      </h3>
+                      <h3 className="text-lg md:text-xl font-extrabold uppercase" style={headingStyle()}>{location.name}</h3>
                       <span className="text-sm" style={{ color: RED }}>→</span>
                     </div>
                     {location.description && (
@@ -284,9 +231,7 @@ export default function LocationsPage() {
                     <p className="mt-3 text-sm">
                       {location.starting_price != null ? (
                         <>
-                          <span className="font-bold" style={{ color: RED }}>
-                            KES {location.starting_price.toLocaleString()}
-                          </span>{' '}
+                          <span className="font-bold" style={{ color: RED }}>KES {location.starting_price.toLocaleString()}</span>{' '}
                           <span style={{ color: '#6A6A6A' }}>/ night and up</span>
                         </>
                       ) : (
@@ -306,29 +251,17 @@ export default function LocationsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
           {STEPS.map((step) => (
-            <div
-              key={step.n}
-              className="bg-white rounded-xl border p-5 md:p-6"
-              style={{ borderColor: CARD_BORDER }}
-            >
-              <p className="text-3xl font-extrabold mb-4" style={{ fontFamily: HEADING_FONT, color: RED }}>
-                {step.n}
-              </p>
+            <div key={step.n} className="bg-white rounded-xl border p-5 md:p-6" style={{ borderColor: CARD_BORDER }}>
+              <p className="text-3xl font-extrabold mb-4" style={{ fontFamily: HEADING_FONT, color: RED }}>{step.n}</p>
               <p className="text-base font-bold mb-2" style={{ color: INK }}>{step.title}</p>
               <p className="text-sm leading-relaxed" style={{ color: '#6A6A6A' }}>{step.body}</p>
             </div>
           ))}
         </div>
 
-        <div
-          className="mt-8 rounded-xl p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6"
-          style={{ background: '#14100E' }}
-        >
+        <div className="mt-8 rounded-xl p-6 md:p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6" style={{ background: '#14100E' }}>
           <div>
-            <h3
-              className="text-xl md:text-2xl font-extrabold uppercase"
-              style={{ fontFamily: HEADING_FONT, letterSpacing: '-0.015em', color: '#FFFFFF' }}
-            >
+            <h3 className="text-xl md:text-2xl font-extrabold uppercase" style={{ fontFamily: HEADING_FONT, letterSpacing: '-0.015em', color: '#FFFFFF' }}>
               Pay straight to YoungTaks — no apps, no cards.
             </h3>
             <p className="mt-2 text-sm" style={{ color: '#D6D3CE' }}>
@@ -343,10 +276,7 @@ export default function LocationsPage() {
         <div className="max-w-6xl mx-auto px-5 md:px-8 py-10">
           <div className="flex items-center gap-3 mb-2">
             <img src={logo} alt="" className="h-9 w-auto object-contain" />
-            <p
-              className="text-lg md:text-xl font-extrabold uppercase"
-              style={{ fontFamily: HEADING_FONT, color: '#FFFFFF', letterSpacing: '0.01em' }}
-            >
+            <p className="text-lg md:text-xl font-extrabold uppercase" style={{ fontFamily: HEADING_FONT, color: '#FFFFFF', letterSpacing: '0.01em' }}>
               YOUNGTAKS <span style={{ color: RED }}>BNBS</span>
             </p>
           </div>
@@ -354,26 +284,18 @@ export default function LocationsPage() {
 
           <div className="grid sm:grid-cols-2 gap-8 text-sm">
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#8A8A8A' }}>
-                Pay via M-Pesa
-              </p>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#8A8A8A' }}>Pay via M-Pesa</p>
               <p style={{ color: '#E5E5E5' }}>Send Money: {PHONE_DISPLAY} — {PAYEE_NAME}</p>
               <p style={{ color: '#E5E5E5' }}>Paybill: {PAYBILL} · Account: {PAYBILL_ACCOUNT}</p>
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#8A8A8A' }}>
-                Talk to us
-              </p>
+              <p className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: '#8A8A8A' }}>Talk to us</p>
               <p style={{ color: '#E5E5E5' }}>{PHONE_DISPLAY}</p>
-              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="font-semibold" style={{ color: RED }}>
-                Message us on WhatsApp →
-              </a>
+              <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="font-semibold" style={{ color: RED }}>Message us on WhatsApp →</a>
             </div>
           </div>
 
-          <p className="text-[11px] mt-8" style={{ color: '#6A6A6A' }}>
-            Prices shown are for the current season and may change. · © 2026 YoungTaks BNBs
-          </p>
+          <p className="text-[11px] mt-8" style={{ color: '#6A6A6A' }}>Prices shown are for the current season and may change. · © 2026 YoungTaks BNBs</p>
         </div>
       </footer>
     </div>

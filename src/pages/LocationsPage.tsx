@@ -1,194 +1,191 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { getActiveLocations } from '../lib/queries'
-import type { Location } from '../lib/database.types'
+import { getLocationsWithStartingPrice, type LocationWithStartingPrice } from '../lib/queries'
 import logo from '../assets/logo.png.png'
 
-const ACCENTS = [
-  { name: 'red', bg: '#D62828', tint: '#D6282814' },
-  { name: 'teal', bg: '#0F766E', tint: '#0F766E14' },
-  { name: 'gold', bg: '#F5A623', tint: '#F5A62314' },
+const WHATSAPP_URL = 'https://wa.me/254796807457'
+const PHONE_DISPLAY = '0796807457'
+const PAYEE_NAME = 'Siwa Benson Ogilo'
+const PAYBILL = '247247'
+const PAYBILL_ACCOUNT = '1180177539458'
+
+const STEPS = [
+  { n: '01', title: 'Choose your unit', body: 'Browse real units by location and size — Studio to 3BR and larger.' },
+  { n: '02', title: 'Pick your dates', body: 'Check-in from 10:00 AM, check-out by 10:00 AM on your last day.' },
+  { n: '03', title: 'Pay via M-Pesa', body: 'Send money or use the paybill, then submit your transaction code.' },
+  { n: '04', title: 'Get check-in details', body: 'The moment payment is verified, your door code, WiFi and pin are released.' },
 ]
 
-function getGreeting(): string {
-  const hour = new Date().getHours()
-  if (hour < 12) return 'Good morning'
-  if (hour < 17) return 'Good afternoon'
-  return 'Good evening'
-}
-
-function WindowMark({ color, size = 18 }: { color: string; size?: number }) {
-  const gap = size * 0.14
-  const pane = (size - gap) / 2
-  return (
-    <div
-      style={{ width: size, height: size, gap }}
-      className="grid grid-cols-2 grid-rows-2"
-    >
-      {[0, 1, 2, 3].map((i) => (
-        <div key={i} style={{ background: color, width: pane, height: pane, borderRadius: 2 }} />
-      ))}
-    </div>
-  )
-}
-
 export default function LocationsPage() {
-  const [locations, setLocations] = useState<Location[]>([])
+  const [locations, setLocations] = useState<LocationWithStartingPrice[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [query, setQuery] = useState('')
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    getActiveLocations()
+    getLocationsWithStartingPrice()
       .then(setLocations)
       .catch(() => setError('Could not load locations. Please try again.'))
       .finally(() => setLoading(false))
   }, [])
 
-  useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 50)
-    return () => clearTimeout(t)
-  }, [])
-
-  const filtered = useMemo(() => {
-    if (!query.trim()) return locations
-    return locations.filter((l) => l.name.toLowerCase().includes(query.trim().toLowerCase()))
-  }, [locations, query])
-
-  function scrollToGrid() {
-    document.getElementById('spaces-grid')?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  if (loading) return <p className="p-4 text-gray-500">Loading locations...</p>
-  if (error) return <p className="p-4 text-red-600">{error}</p>
-
   return (
-    <div style={{ background: '#FFF8EF', fontFamily: "'Sora', sans-serif" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Sora:wght@400;500;600;700&display=swap');
-        .yt-hero-in { opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s ease; }
-        .yt-hero-in.yt-mounted { opacity: 1; transform: translateY(0); }
-        .yt-hero-in.yt-delay-1 { transition-delay: .1s; }
-        .yt-hero-in.yt-delay-2 { transition-delay: .2s; }
-        .yt-card { transition: transform .25s ease, box-shadow .25s ease; }
-        .yt-card:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(26,26,26,0.10); }
-        .yt-card .yt-mark { opacity: 0; transition: opacity .25s ease; }
-        .yt-card:hover .yt-mark { opacity: 1; }
-      `}</style>
+    <div className="min-h-screen bg-white" style={{ fontFamily: "'Sora', sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap');`}</style>
 
-      {/* Hero */}
-      <section className="px-6 pt-14 pb-16 md:px-12 md:pt-20 md:pb-24 max-w-5xl mx-auto">
-        <div className={`yt-hero-in ${mounted ? 'yt-mounted' : ''} flex items-center gap-3 mb-6`}>
-          <img src={logo} alt="YoungTaks BNBs" className="h-10 w-auto" />
+      {/* Nav */}
+      <nav className="flex items-center justify-between px-5 md:px-10 py-3 border-b" style={{ borderColor: '#EFEFEF' }}>
+        <div className="flex items-center gap-2">
+          <img src={logo} alt="YoungTaks BNBs" className="h-8 w-auto" />
+          <div>
+            <p className="text-sm font-bold leading-tight" style={{ color: '#1A1A1A' }}>YoungTaks BNBs</p>
+            <p className="text-[11px] leading-tight" style={{ color: '#D62828' }}>Your Trusted Booking Partner</p>
+          </div>
         </div>
-        <p className={`yt-hero-in yt-delay-1 ${mounted ? 'yt-mounted' : ''} text-lg`} style={{ color: '#D62828' }}>
-          {getGreeting()}.
-        </p>
-        <h1
-          className={`yt-hero-in yt-delay-1 ${mounted ? 'yt-mounted' : ''} mt-2 text-4xl md:text-5xl leading-tight`}
-          style={{ fontFamily: "'Fraunces', serif", color: '#1A1A1A' }}
-        >
-          Find a place along the coast that already feels like yours.
-        </h1>
-        <p className={`yt-hero-in yt-delay-2 ${mounted ? 'yt-mounted' : ''} mt-4 text-base md:text-lg max-w-xl`} style={{ color: '#4A4A4A' }}>
-          Know exactly where you're headed, or just want to see what's out there — either way works here.
-        </p>
-
-        <div className={`yt-hero-in yt-delay-2 ${mounted ? 'yt-mounted' : ''} mt-8 flex flex-col sm:flex-row gap-3`}>
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={scrollToGrid}
-            placeholder="Search by area, e.g. Nyali"
-            className="w-full sm:w-72 rounded-full px-5 py-3 text-sm border-2 outline-none"
-            style={{ borderColor: '#1A1A1A1A' }}
-          />
-          <button
-            onClick={scrollToGrid}
-            className="rounded-full px-6 py-3 text-sm font-semibold text-white"
+        <div className="flex items-center gap-4">
+          <a href="/admin/login" className="text-xs" style={{ color: '#9A9A9A' }}>Admin</a>
+          
+            href="#locations"
+            className="text-xs font-semibold text-white px-4 py-2 rounded-full"
             style={{ background: '#D62828' }}
           >
-            Just show me everything
-          </button>
+            Book a stay
+          </a>
         </div>
-      </section>
+      </nav>
 
-      {/* Mood band */}
-      <section
-        className="px-6 py-14 md:px-12 md:py-20 flex flex-col md:flex-row items-center gap-8 md:gap-16"
-        style={{ background: '#1A1A1A' }}
-      >
-        <WindowMark color="#D62828" size={64} />
+      {/* Hero */}
+      <section className="px-5 md:px-10 py-10 md:py-16 grid md:grid-cols-2 gap-10 items-center">
         <div>
-          <h2 className="text-2xl md:text-3xl" style={{ fontFamily: "'Fraunces', serif", color: '#FFF8EF' }}>
-            Every stay, checked and approved by hand.
-          </h2>
-          <p className="mt-3 max-w-lg text-sm md:text-base" style={{ color: '#CFCFCF' }}>
-            We don't list a place until we'd send our own family there. That's the whole idea behind YoungTaks.
+          <p className="text-xs font-semibold mb-3" style={{ color: '#7A7A7A' }}>
+            {locations.map((l) => l.name).join(' · ')}
           </p>
+          <h1 className="text-3xl md:text-5xl font-extrabold leading-tight" style={{ color: '#1A1A1A' }}>
+            Book your stay in two minutes.
+          </h1>
+          <p className="mt-3 max-w-md text-sm md:text-base" style={{ color: '#5A5A5A' }}>
+            Serviced apartments across the Kenyan coast. Pick your unit, pay via M-Pesa, and your
+            check-in details are released the moment payment is verified.
+          </p>
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            
+              href="#locations"
+              className="text-sm font-semibold text-white px-5 py-3 rounded-full"
+              style={{ background: '#D62828' }}
+            >
+              Find your stay
+            </a>
+            
+              href="#how"
+              className="text-sm font-semibold px-5 py-3 rounded-full border"
+              style={{ borderColor: '#1A1A1A33', color: '#1A1A1A' }}
+            >
+              How it works
+            </a>
+          </div>
+
+          <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs" style={{ color: '#5A5A5A' }}>
+            <li>✓ Check-in 10:00 AM</li>
+            <li>✓ Pay via M-Pesa</li>
+            <li>✓ WhatsApp support</li>
+          </ul>
         </div>
+
+        <div className="rounded-2xl h-64 md:h-80" style={{ background: 'linear-gradient(135deg, #D6282822, #F5A62322, #0F766E22)' }} />
       </section>
 
-      {/* Grid */}
-      <section id="spaces-grid" className="px-6 py-16 md:px-12 md:py-24 max-w-6xl mx-auto">
-        <h2 className="text-2xl md:text-3xl mb-8" style={{ fontFamily: "'Fraunces', serif", color: '#1A1A1A' }}>
-          Choose a location
-        </h2>
+      {/* Where to */}
+      <section id="locations" className="px-5 md:px-10 py-10 md:py-14" style={{ background: '#F6F6F4' }}>
+        <h2 className="text-xl md:text-2xl font-bold" style={{ color: '#1A1A1A' }}>Where to?</h2>
+        <p className="text-sm mt-1" style={{ color: '#7A7A7A' }}>
+          {locations.length} location{locations.length !== 1 ? 's' : ''} along the coast. Pick one to see every unit.
+        </p>
+        <p className="text-xs mt-1 mb-6" style={{ color: '#9A9A9A' }}>Prices shown are for the current season and may change.</p>
 
-        {filtered.length === 0 && (
-          <p className="text-sm" style={{ color: '#4A4A4A' }}>
-            No locations match "{query}" — try a different area, or clear your search.
-          </p>
-        )}
+        {loading && <p className="text-sm" style={{ color: '#7A7A7A' }}>Loading locations...</p>}
+        {error && <p className="text-sm text-red-600">{error}</p>}
 
-        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {filtered.map((location, i) => {
-            const accent = ACCENTS[i % ACCENTS.length]
-            return (
+        {!loading && !error && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {locations.map((location) => (
               <Link
                 key={location.id}
                 to={`/locations/${location.id}`}
-                className="yt-card relative block rounded-2xl p-6"
-                style={{ background: accent.tint, border: `1px solid ${accent.bg}33` }}
+                className="bg-white rounded-xl border p-5 hover:shadow-md transition-shadow"
+                style={{ borderColor: '#EAEAEA' }}
               >
-                <div className="yt-mark absolute top-5 right-5">
-                  <WindowMark color={accent.bg} size={16} />
-                </div>
-                <h3 className="text-lg font-semibold" style={{ color: '#1A1A1A' }}>
-                  {location.name}
-                </h3>
+                <p className="text-sm font-semibold flex items-center justify-between" style={{ color: '#1A1A1A' }}>
+                  {location.name} <span style={{ color: '#D62828' }}>→</span>
+                </p>
                 {location.description && (
-                  <p className="text-sm mt-2" style={{ color: '#4A4A4A' }}>
-                    {location.description}
-                  </p>
+                  <p className="text-xs mt-2" style={{ color: '#7A7A7A' }}>{location.description}</p>
                 )}
-                <span className="inline-block mt-4 text-sm font-semibold" style={{ color: accent.bg }}>
-                  View units
-                </span>
+                <p className="text-sm font-semibold mt-3" style={{ color: '#D62828' }}>
+                  {location.starting_price != null
+                    ? `KES ${location.starting_price.toLocaleString()} / night and up`
+                    : 'See units'}
+                </p>
               </Link>
-            )
-          })}
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* How it works */}
+      <section id="how" className="px-5 md:px-10 py-10 md:py-14">
+        <h2 className="text-xl md:text-2xl font-bold mb-6" style={{ color: '#1A1A1A' }}>How it works</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+          {STEPS.map((step) => (
+            <div key={step.n}>
+              <p className="text-2xl font-extrabold mb-1" style={{ color: '#D6282833' }}>{step.n}</p>
+              <p className="text-sm font-semibold mb-1" style={{ color: '#1A1A1A' }}>{step.title}</p>
+              <p className="text-xs" style={{ color: '#7A7A7A' }}>{step.body}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* Closing CTA */}
-      <section className="px-6 py-16 md:px-12 md:py-20 text-center" style={{ background: '#F5A62314' }}>
-        <h2 className="text-2xl md:text-3xl mb-3" style={{ fontFamily: "'Fraunces', serif", color: '#1A1A1A' }}>
-          Not sure yet? That's fine.
+      {/* Payment CTA */}
+      <section className="px-5 md:px-10 py-10 md:py-14 text-center" style={{ background: '#1A1A1A' }}>
+        <h2 className="text-lg md:text-xl font-bold mb-2" style={{ color: '#FFFFFF' }}>
+          Pay straight to YoungTaks — no apps, no cards.
         </h2>
-        <p className="text-sm md:text-base mb-6" style={{ color: '#4A4A4A' }}>
-          Scroll back up whenever you're ready — we'll be here.
+        <p className="text-sm mb-6" style={{ color: '#CFCFCF' }}>
+          Send Money {PHONE_DISPLAY} ({PAYEE_NAME}) or Paybill {PAYBILL}, Account {PAYBILL_ACCOUNT}.
         </p>
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="rounded-full px-6 py-3 text-sm font-semibold text-white"
-          style={{ background: '#0F766E' }}
+        
+          href="#locations"
+          className="inline-block text-sm font-semibold text-white px-6 py-3 rounded-full"
+          style={{ background: '#D62828' }}
         >
-          Back to top
-        </button>
+          Start booking
+        </a>
       </section>
+
+      {/* Footer */}
+      <footer className="px-5 md:px-10 py-8 md:py-10" style={{ background: '#111111' }}>
+        <p className="text-sm font-bold" style={{ color: '#FFFFFF' }}>YoungTaks BNBs</p>
+        <p className="text-xs mb-5" style={{ color: '#D62828' }}>Your Trusted Booking Partner</p>
+
+        <div className="grid sm:grid-cols-2 gap-6 text-xs" style={{ color: '#B5B5B5' }}>
+          <div>
+            <p className="font-semibold mb-1" style={{ color: '#E5E5E5' }}>Pay via M-Pesa</p>
+            <p>Send Money: {PHONE_DISPLAY} — {PAYEE_NAME}</p>
+            <p>Paybill: {PAYBILL} · Account: {PAYBILL_ACCOUNT}</p>
+          </div>
+          <div>
+            <p className="font-semibold mb-1" style={{ color: '#E5E5E5' }}>Talk to us</p>
+            <p>{PHONE_DISPLAY}</p>
+            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" style={{ color: '#D62828' }}>
+              Message us on WhatsApp →
+            </a>
+          </div>
+        </div>
+
+        <p className="text-[11px] mt-6" style={{ color: '#6A6A6A' }}>
+          Prices shown are for the current season and may change. · © 2026 YoungTaks BNBs
+        </p>
+      </footer>
     </div>
   )
 }

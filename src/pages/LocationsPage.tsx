@@ -99,16 +99,27 @@ export default function LocationsPage() {
         </div>
       </nav>
 
-      {/* Hero */}
+            {/* Hero */}
       <section className="px-5 md:px-10 py-10 md:py-16 grid md:grid-cols-2 gap-10 items-center">
         <div>
-          <p className="text-xs font-semibold mb-3" style={{ color: '#7A7A7A' }}>
+          <div
+            className="inline-flex items-center gap-2 px-4 py-1.5 mb-4 rounded-full border text-[11px] font-bold tracking-wider uppercase"
+            style={{ borderColor: '#EAEAEA', color: '#5A5A5A' }}
+          >
+            <span className="w-2 h-2 rounded-full" style={{ background: '#D62828' }} />
             {locations.map((l) => l.name).join(' · ')}
-          </p>
-          <h1 className="text-3xl md:text-5xl font-extrabold leading-tight" style={{ color: '#1A1A1A' }}>
-            Book your stay in two minutes.
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black uppercase leading-[1.05]" style={{ color: '#1A1A1A' }}>
+            Book your stay in{' '}
+            <span className="relative inline-block" style={{ color: '#D62828' }}>
+              two minutes.
+              <span
+                className="absolute left-0 right-0 -bottom-1 h-1.5 rounded-full"
+                style={{ background: '#D6282855' }}
+              />
+            </span>
           </h1>
-          <p className="mt-3 max-w-md text-sm md:text-base" style={{ color: '#5A5A5A' }}>
+          <p className="mt-4 max-w-md text-sm md:text-base" style={{ color: '#5A5A5A' }}>
             Serviced apartments across the Kenyan coast. Pick your unit, pay via M-Pesa, and your
             check-in details are released the moment payment is verified.
           </p>
@@ -127,8 +138,11 @@ export default function LocationsPage() {
 
         {/* Hero media — shown to everyone; upload/remove controls only appear when logged in as admin */}
         <div
-          className="relative rounded-2xl h-64 md:h-80 overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #D6282822, #F5A62322, #0F766E22)' }}
+          className="relative rounded-2xl h-64 md:h-96 overflow-hidden border shadow-xl"
+          style={{
+            background: 'linear-gradient(135deg, #D6282822, #F5A62322, #0F766E22)',
+            borderColor: '#1A1A1A22',
+          }}
         >
           {siteSettings?.hero_media_url ? (
             siteSettings.hero_media_type === 'video' ? (
@@ -171,7 +185,6 @@ export default function LocationsPage() {
           )}
         </div>
       </section>
-
       {/* Where to */}
       <section id="locations" className="px-5 md:px-10 py-10 md:py-14" style={{ background: '#F6F6F4' }}>
         <h2 className="text-xl md:text-2xl font-bold" style={{ color: '#1A1A1A' }}>Where to?</h2>

@@ -43,13 +43,7 @@ export default function LocationsPage() {
         </div>
         <div className="flex items-center gap-4">
           <a href="/admin/login" className="text-xs" style={{ color: '#9A9A9A' }}>Admin</a>
-          
-            href="#locations"
-            className="text-xs font-semibold text-white px-4 py-2 rounded-full"
-            style={{ background: '#D62828' }}
-          >
-            Book a stay
-          </a>
+          <a href="#locations" className="text-xs font-semibold text-white px-4 py-2 rounded-full" style={{ background: '#D62828' }}>Book a stay</a>
         </div>
       </nav>
 
@@ -68,20 +62,8 @@ export default function LocationsPage() {
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
-            
-              href="#locations"
-              className="text-sm font-semibold text-white px-5 py-3 rounded-full"
-              style={{ background: '#D62828' }}
-            >
-              Find your stay
-            </a>
-            
-              href="#how"
-              className="text-sm font-semibold px-5 py-3 rounded-full border"
-              style={{ borderColor: '#1A1A1A33', color: '#1A1A1A' }}
-            >
-              How it works
-            </a>
+            <a href="#locations" className="text-sm font-semibold text-white px-5 py-3 rounded-full" style={{ background: '#D62828' }}>Find your stay</a>
+            <a href="#how" className="text-sm font-semibold px-5 py-3 rounded-full border" style={{ borderColor: '#1A1A1A33', color: '#1A1A1A' }}>How it works</a>
           </div>
 
           <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-xs" style={{ color: '#5A5A5A' }}>
@@ -108,12 +90,7 @@ export default function LocationsPage() {
         {!loading && !error && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {locations.map((location) => (
-              <Link
-                key={location.id}
-                to={`/locations/${location.id}`}
-                className="bg-white rounded-xl border p-5 hover:shadow-md transition-shadow"
-                style={{ borderColor: '#EAEAEA' }}
-              >
+              <Link key={location.id} to={`/locations/${location.id}`} className="bg-white rounded-xl border p-5 hover:shadow-md transition-shadow" style={{ borderColor: '#EAEAEA' }}>
                 <p className="text-sm font-semibold flex items-center justify-between" style={{ color: '#1A1A1A' }}>
                   {location.name} <span style={{ color: '#D62828' }}>→</span>
                 </p>
@@ -153,13 +130,7 @@ export default function LocationsPage() {
         <p className="text-sm mb-6" style={{ color: '#CFCFCF' }}>
           Send Money {PHONE_DISPLAY} ({PAYEE_NAME}) or Paybill {PAYBILL}, Account {PAYBILL_ACCOUNT}.
         </p>
-        
-          href="#locations"
-          className="inline-block text-sm font-semibold text-white px-6 py-3 rounded-full"
-          style={{ background: '#D62828' }}
-        >
-          Start booking
-        </a>
+        <a href="#locations" className="inline-block text-sm font-semibold text-white px-6 py-3 rounded-full" style={{ background: '#D62828' }}>Start booking</a>
       </section>
 
       {/* Footer */}
@@ -176,9 +147,7 @@ export default function LocationsPage() {
           <div>
             <p className="font-semibold mb-1" style={{ color: '#E5E5E5' }}>Talk to us</p>
             <p>{PHONE_DISPLAY}</p>
-            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" style={{ color: '#D62828' }}>
-              Message us on WhatsApp →
-            </a>
+            <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" style={{ color: '#D62828' }}>Message us on WhatsApp →</a>
           </div>
         </div>
 

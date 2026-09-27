@@ -1,6 +1,9 @@
 import { Routes, Route, Link } from 'react-router-dom'
 import LocationsPage from './pages/LocationsPage'
 import UnitsPage from './pages/UnitsPage'
+import UnitDetailPage from './pages/UnitDetailPage'
+import BookingConfirmPage from './pages/BookingConfirmPage'
+import PaymentPage from './pages/PaymentPage'
 
 function App() {
   return (
@@ -15,6 +18,9 @@ function App() {
         <Routes>
           <Route path="/" element={<LocationsPage />} />
           <Route path="/locations/:locationId" element={<UnitsPage />} />
+          <Route path="/units/:unitId" element={<UnitDetailPage />} />
+          <Route path="/booking/confirm" element={<BookingConfirmPage />} />
+          <Route path="/booking/:bookingId/payment" element={<PaymentPage />} />
         </Routes>
       </main>
     </div>

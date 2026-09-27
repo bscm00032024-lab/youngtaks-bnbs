@@ -55,7 +55,11 @@ export async function createBooking(booking: {
   const { data, error } = await supabase
     .from('bookings')
     .insert({
-      ...booking,
+      unit_id: booking.unit_id,
+      check_in: booking.check_in,
+      check_out: booking.check_out,
+      customer_name: booking.customer_name,
+      customer_phone: booking.customer_phone,
       status: 'pending_payment',
       mpesa_code: null,
       wifi_details: null,

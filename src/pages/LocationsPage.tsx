@@ -16,10 +16,16 @@ const STEPS = [
   { n: '04', title: 'Get check-in details', body: 'The moment payment is verified, your door code, WiFi and pin are released.' },
 ]
 
+// TODO: replace with your real admin/auth check (e.g. from context or a logged-in flag)
+const IS_ADMIN = true
+
+type HeroMedia = { url: string; type: 'image' | 'video' }
+
 export default function LocationsPage() {
   const [locations, setLocations] = useState<LocationWithStartingPrice[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [heroMedia, setHeroMedia] = useState<HeroMedia | null>(null)
 
   useEffect(() => {
     getLocationsWithStartingPrice()
@@ -28,19 +34,30 @@ export default function LocationsPage() {
       .finally(() => setLoading(false))
   }, [])
 
+  function handleHeroMediaChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const url = URL.createObjectURL(file)
+    const type: HeroMedia['type'] = file.type.startsWith('video') ? 'video' : 'image'
+    setHeroMedia({ url, type })
+    // NOTE: this only previews the file in the browser. To make it persist for
+    // every visitor, upload `file` to your storage/backend here and save the
+    // returned URL instead of the local blob URL.
+  }
+
   return (
     <div className="min-h-screen bg-white" style={{ fontFamily: "'Sora', sans-serif" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap');`}</style>
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-5 md:px-10 py-3 border-b" style={{ borderColor: '#EFEFEF' }}>
-        <div className="flex items-center gap-2">
-          <img src={logo} alt="YoungTaks BNBs" className="h-8 w-auto" />
+      <nav className="flex items-center justify-between px-5 md:px-10 py-2 border-b" style={{ borderColor: '#EFEFEF' }}>
+        <a href="/" className="flex items-center gap-3">
+          <img src={logo} alt="YoungTaks BNBs" className="h-12 md:h-14 w-auto" />
           <div>
-            <p className="text-sm font-bold leading-tight" style={{ color: '#1A1A1A' }}>YoungTaks BNBs</p>
-            <p className="text-[11px] leading-tight" style={{ color: '#D62828' }}>Your Trusted Booking Partner</p>
+            <p className="text-base md:text-lg font-bold leading-tight" style={{ color: '#1A1A1A' }}>YoungTaks BNBs</p>
+            <p className="text-xs md:text-sm leading-tight" style={{ color: '#D62828' }}>Your Trusted Booking Partner</p>
           </div>
-        </div>
+        </a>
         <div className="flex items-center gap-4">
           <a href="/admin/login" className="text-xs" style={{ color: '#9A9A9A' }}>Admin</a>
           <a href="#locations" className="text-xs font-semibold text-white px-4 py-2 rounded-full" style={{ background: '#D62828' }}>Book a stay</a>
@@ -73,7 +90,38 @@ export default function LocationsPage() {
           </ul>
         </div>
 
-        <div className="rounded-2xl h-64 md:h-80" style={{ background: 'linear-gradient(135deg, #D6282822, #F5A62322, #0F766E22)' }} />
+        {/* Hero media / admin upload area */}
+        <div
+          className="relative rounded-2xl h-64 md:h-80 overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #D6282822, #F5A62322, #0F766E22)' }}
+        >
+          {heroMedia ? (
+            heroMedia.type === 'video' ? (
+              <video src={heroMedia.url} className="w-full h-full object-cover" controls />
+            ) : (
+              <img src={heroMedia.url} className="w-full h-full object-cover" alt="Featured stay" />
+            )
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-xs text-center px-6" style={{ color: '#9A9A9A' }}>
+              No photo or video added yet
+            </div>
+          )}
+
+          {IS_ADMIN && (
+            <label
+              className="absolute bottom-3 right-3 text-xs font-semibold text-white px-4 py-2 rounded-full cursor-pointer shadow"
+              style={{ background: '#1A1A1A' }}
+            >
+              {heroMedia ? 'Change photo/video' : 'Add photo/video'}
+              <input
+                type="file"
+                accept="image/*,video/*"
+                className="hidden"
+                onChange={handleHeroMediaChange}
+              />
+            </label>
+          )}
+        </div>
       </section>
 
       {/* Where to */}

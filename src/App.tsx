@@ -9,6 +9,7 @@ import AdminLayout from './pages/admin/AdminLayout'
 import AdminBookingsPage from './pages/admin/AdminBookingsPage'
 import AdminLocationsPage from './pages/admin/AdminLocationsPage'
 import AdminUnitsPage from './pages/admin/AdminUnitsPage'
+import AdminBlogPage from './pages/admin/AdminBlogPage'
 import RequireAuth from './components/RequireAuth'
 
 function App() {
@@ -85,7 +86,6 @@ function App() {
         }
       />
       <Route path="/admin/login" element={<AdminLoginPage />} />
-              <Route path="units" element={<AdminUnitsPage />} />
       <Route
         path="/admin"
         element={
@@ -96,6 +96,8 @@ function App() {
       >
         <Route path="bookings" element={<AdminBookingsPage />} />
         <Route path="locations" element={<AdminLocationsPage />} />
+        <Route path="units" element={<AdminUnitsPage />} />
+        <Route path="blog" element={<AdminBlogPage />} />
       </Route>
     </Routes>
   )

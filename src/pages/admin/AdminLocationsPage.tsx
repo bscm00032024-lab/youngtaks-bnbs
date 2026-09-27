@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   getAllLocationsAdmin,
   createLocation,
@@ -8,6 +9,7 @@ import {
 import type { Location } from '../../lib/database.types'
 
 export default function AdminLocationsPage() {
+  const navigate = useNavigate()
   const [locations, setLocations] = useState<Location[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -93,6 +95,7 @@ export default function AdminLocationsPage() {
   return (
     <div className="p-4 max-w-2xl">
       <h2 className="text-lg font-semibold mb-4">Locations</h2>
+      <p className="text-sm text-gray-500 mb-4">Click a location to view and manage its units.</p>
 
       <form onSubmit={handleCreate} className="border border-gray-200 rounded-lg p-4 mb-6 space-y-2">
         <p className="font-semibold text-sm">Add a new location</p>
@@ -155,8 +158,11 @@ export default function AdminLocationsPage() {
               </div>
             ) : (
               <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-semibold">{location.name}</p>
+                <div
+                  className="cursor-pointer flex-1"
+                  onClick={() => navigate(`/admin/locations/${location.id}/units`)}
+                >
+                  <p className="font-semibold hover:underline">{location.name}</p>
                   {location.description && (
                     <p className="text-sm text-gray-500">{location.description}</p>
                   )}
@@ -169,7 +175,7 @@ export default function AdminLocationsPage() {
                     {location.active ? 'Active' : 'Inactive'}
                   </span>
                 </div>
-                <div className="flex gap-3 text-sm">
+                <div className="flex gap-3 text-sm" onClick={(e) => e.stopPropagation()}>
                   <button onClick={() => startEdit(location)} className="text-brand-red hover:underline">
                     Edit
                   </button>

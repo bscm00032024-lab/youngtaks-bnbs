@@ -32,6 +32,7 @@ export default function UnitDetailPage() {
   const [location, setLocation] = useState<Location | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [activePhoto, setActivePhoto] = useState(0)
 
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
@@ -65,6 +66,8 @@ export default function UnitDetailPage() {
     return <div className="min-h-screen bg-[#F4F1EA] flex items-center justify-center font-bold text-red-600">Unit not found.</div>
   }
 
+  const photos: string[] = unit.photos ?? []
+  const videos: string[] = unit.videos ?? []
   const nights = checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 0
   const total = nights > 0 ? nights * unit.price : 0
 
@@ -144,6 +147,51 @@ export default function UnitDetailPage() {
               <p className="text-2xl font-black" style={{ color: RED }}>KES {unit.price.toLocaleString()} <span className="text-xs font-medium text-[#5A5A5A]">/ night</span></p>
             </div>
           </div>
+
+          {/* Photo Gallery */}
+          {photos.length > 0 && (
+            <div className="mb-8">
+              <div className="rounded-2xl border-2 border-[#111111] overflow-hidden shadow-[4px_4px_0px_0px_#111111]">
+                <img
+                  src={photos[Math.min(activePhoto, photos.length - 1)]}
+                  alt={TYPE_LABELS[unit.type] + ' photo'}
+                  className="w-full h-64 md:h-96 object-cover"
+                />
+              </div>
+              {photos.length > 1 && (
+                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                  {photos.map((url, i) => (
+                    <button
+                      key={url + i}
+                      type="button"
+                      onClick={() => setActivePhoto(i)}
+                      className="flex-shrink-0 rounded-lg overflow-hidden border-2"
+                      style={{ borderColor: i === activePhoto ? RED : INK }}
+                    >
+                      <img src={url} alt={'Thumbnail ' + (i + 1)} loading="lazy" className="h-16 w-24 object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Videos */}
+          {videos.length > 0 && (
+            <div className="mb-8 space-y-4">
+              <h3 className="text-xs font-black uppercase tracking-widest text-[#111111]">Video Tour</h3>
+              {videos.map((url, i) => (
+                <video
+                  key={url + i}
+                  src={url}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full rounded-2xl border-2 border-[#111111] bg-black"
+                />
+              ))}
+            </div>
+          )}
 
           {unit.description && <p className="text-base font-medium text-[#5A5A5A] leading-relaxed mb-4">{unit.description}</p>}
           <p className="text-xs font-bold uppercase tracking-wider text-[#7A7A7A] mb-8 bg-[#F4F1EA] p-3 rounded-xl border border-[#111111]">

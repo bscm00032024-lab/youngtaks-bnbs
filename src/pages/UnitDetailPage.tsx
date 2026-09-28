@@ -2,6 +2,13 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { getUnitById, getLocationById } from '../lib/queries'
 import type { Unit, Location, UnitType } from '../lib/database.types'
+import logo from '../assets/logo.png.png'
+
+const WHATSAPP_URL = 'https://wa.me/254796807457'
+const HEADING_FONT = "'Archivo', sans-serif"
+const BODY_FONT = "'DM Sans', sans-serif"
+const RED = '#D62828'
+const INK = '#111111'
 
 const TYPE_LABELS: Record<UnitType, string> = {
   studio: 'Studio',
@@ -47,15 +54,15 @@ export default function UnitDetailPage() {
   }, [unitId])
 
   if (loading) {
-    return <p className="p-4 text-gray-500">Loading unit...</p>
+    return <div className="min-h-screen bg-[#F4F1EA] flex items-center justify-center font-black uppercase tracking-widest text-sm text-[#7A7A7A]">Loading unit details...</div>
   }
 
   if (error) {
-    return <p className="p-4 text-red-600">{error}</p>
+    return <div className="min-h-screen bg-[#F4F1EA] flex items-center justify-center font-bold text-red-600">{error}</div>
   }
 
   if (!unit) {
-    return <p className="p-4 text-red-600">Unit not found.</p>
+    return <div className="min-h-screen bg-[#F4F1EA] flex items-center justify-center font-bold text-red-600">Unit not found.</div>
   }
 
   const nights = checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 0
@@ -91,81 +98,136 @@ export default function UnitDetailPage() {
   }
 
   return (
-    <div className="p-4 max-w-md">
-      {location && (
-        <Link to={'/locations/' + location.id} className="text-sm text-brand-red hover:underline">
-          {'<- '}{location.name}
-        </Link>
-      )}
-      <h2 className="text-lg font-semibold mt-2">{TYPE_LABELS[unit.type]}</h2>
-      <p className="text-brand-red font-semibold">KES {unit.price.toLocaleString()} / night</p>
-      {unit.description && <p className="text-sm text-gray-500 mt-1">{unit.description}</p>}
-      <p className="text-xs text-gray-400 mt-1">Prices shown are for the current season and may change.</p>
+    <div className="min-h-screen text-[#111111] selection:bg-[#D62828] selection:text-white" style={{ fontFamily: BODY_FONT, background: '#F4F1EA' }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');`}</style>
 
-      {unit.amenities.length > 0 && (
-        <ul className="text-sm text-gray-600 mt-3 list-disc list-inside">
-          {unit.amenities.map((a) => (
-            <li key={a}>{a}</li>
-          ))}
-        </ul>
-      )}
-
-      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Check-in (10:00 AM)</label>
-          <input
-            type="date"
-            value={checkIn}
-            onChange={(e) => setCheckIn(e.target.value)}
-            className="w-full border border-gray-300 rounded-md p-2"
-          />
+      {/* Brutalist Navigation */}
+      <nav className="sticky top-0 z-50 bg-[#111111] border-b-2 border-[#111111] text-white">
+        <div className="max-w-7xl mx-auto flex items-center justify-between px-5 md:px-10 py-4">
+          <Link to="/" className="flex items-center gap-3.5 group">
+            <div className="bg-white p-1.5 rounded-lg border-2 border-white">
+              <img src={logo} alt="YoungTaks BNBs" className="h-10 w-auto object-contain" />
+            </div>
+            <div>
+              <p className="text-lg md:text-xl font-black uppercase tracking-tight" style={{ fontFamily: HEADING_FONT }}>
+                YoungTaks <span style={{ color: RED }}>BNBs</span>
+              </p>
+              <p className="text-[10px] font-bold tracking-widest text-[#D62828] uppercase">Coastal Residences</p>
+            </div>
+          </Link>
+          <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="text-xs font-black uppercase bg-[#D62828] text-white px-5 py-2.5 rounded-xl border-2 border-[#D62828] shadow-[3px_3px_0px_0px_#ffffff]">
+            WhatsApp Concierge
+          </a>
         </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Check-out (10:00 AM)</label>
-          <input
-            type="date"
-            value={checkOut}
-            onChange={(e) => setCheckOut(e.target.value)}
-            className="w-full border border-gray-300 rounded-md p-2"
-          />
-        </div>
+      </nav>
 
-        {nights > 0 && (
-          <p className="text-sm text-gray-600">
-            {nights} night{nights > 1 ? 's' : ''} x KES {unit.price.toLocaleString()} ={' '}
-            <span className="font-semibold text-brand-black">KES {total.toLocaleString()}</span>
-          </p>
+      <main className="max-w-4xl mx-auto px-5 py-12">
+        {location && (
+          <Link to={'/locations/' + location.id} className="inline-block text-xs font-black uppercase tracking-wider text-[#7A7A7A] hover:text-[#111111] mb-6 bg-white px-4 py-2 rounded-lg border-2 border-[#111111] shadow-[2px_2px_0px_0px_#111111] transition-all">
+            ← Back to {location.name}
+          </Link>
         )}
 
-        <div>
-          <label className="block text-sm font-medium mb-1">Your name</label>
-          <input
-            type="text"
-            value={customerName}
-            onChange={(e) => setCustomerName(e.target.value)}
-            className="w-full border border-gray-300 rounded-md p-2"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Phone number</label>
-          <input
-            type="tel"
-            value={customerPhone}
-            onChange={(e) => setCustomerPhone(e.target.value)}
-            placeholder="07XXXXXXXX"
-            className="w-full border border-gray-300 rounded-md p-2"
-          />
-        </div>
+        <div className="bg-white rounded-2xl border-2 border-[#111111] p-8 md:p-12 shadow-[8px_8px_0px_0px_#111111]">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-[#111111] pb-6 mb-8">
+            <div>
+              <span className="bg-[#111111] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded mb-3 inline-block">
+                Verified Unit
+              </span>
+              <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight" style={{ fontFamily: HEADING_FONT }}>
+                {TYPE_LABELS[unit.type]}
+              </h1>
+            </div>
+            <div className="text-left md:text-right">
+              <p className="text-xs font-bold uppercase tracking-wider text-[#7A7A7A]">Rate</p>
+              <p className="text-2xl font-black" style={{ color: RED }}>KES {unit.price.toLocaleString()} <span className="text-xs font-medium text-[#5A5A5A]">/ night</span></p>
+            </div>
+          </div>
 
-        {formError && <p className="text-sm text-red-600">{formError}</p>}
+          {unit.description && <p className="text-base font-medium text-[#5A5A5A] leading-relaxed mb-6">{unit.description}</p>}
+          <p className="text-xs font-bold uppercase tracking-wider text-[#7A7A7A] mb-8 bg-[#F4F1EA] p-3 rounded-xl border border-[#111111]">
+            Prices shown are for the current season and may change.
+          </p>
 
-        <button
-          type="submit"
-          className="w-full bg-brand-red text-white font-semibold py-2 rounded-md hover:opacity-90 transition-opacity"
-        >
-          Book now
-        </button>
-      </form>
+          {unit.amenities.length > 0 && (
+            <div className="mb-8">
+              <h3 className="text-xs font-black uppercase tracking-widest mb-3 text-[#111111]">Unit Amenities</h3>
+              <div className="flex flex-wrap gap-2">
+                {unit.amenities.map((a) => (
+                  <span key={a} className="bg-[#F4F1EA] border-2 border-[#111111] text-xs font-bold uppercase px-3 py-1.5 rounded-xl shadow-[2px_2px_0px_0px_#111111]">
+                    ✓ {a}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Booking Form */}
+          <form onSubmit={handleSubmit} className="space-y-6 pt-6 border-t-2 border-[#111111]">
+            <h3 className="text-xl font-black uppercase tracking-tight" style={{ fontFamily: HEADING_FONT }}>Reserve Your Stay</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider mb-2">Check-in (10:00 AM)</label>
+                <input
+                  type="date"
+                  value={checkIn}
+                  onChange={(e) => setCheckIn(e.target.value)}
+                  className="w-full p-3.5 rounded-xl border-2 border-[#111111] font-medium bg-[#FBFAF6]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider mb-2">Check-out (10:00 AM)</label>
+                <input
+                  type="date"
+                  value={checkOut}
+                  onChange={(e) => setCheckOut(e.target.value)}
+                  className="w-full p-3.5 rounded-xl border-2 border-[#111111] font-medium bg-[#FBFAF6]"
+                />
+              </div>
+            </div>
+
+            {nights > 0 && (
+              <div className="bg-[#EBE7DF] p-4 rounded-xl border-2 border-[#111111] flex items-center justify-between">
+                <span className="text-xs font-black uppercase tracking-wider">Total Calculation ({nights} night{nights > 1 ? 's' : ''})</span>
+                <span className="text-lg font-black" style={{ color: INK }}>KES {total.toLocaleString()}</span>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider mb-2">Your Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Siwa Benson"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  className="w-full p-3.5 rounded-xl border-2 border-[#111111] font-medium bg-[#FBFAF6]"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-black uppercase tracking-wider mb-2">Phone Number (M-Pesa)</label>
+                <input
+                  type="tel"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="07XXXXXXXX"
+                  className="w-full p-3.5 rounded-xl border-2 border-[#111111] font-medium bg-[#FBFAF6]"
+                />
+              </div>
+            </div>
+
+            {formError && <div className="p-4 bg-red-100 border-2 border-red-600 text-red-700 text-xs font-bold rounded-xl">{formError}</div>}
+
+            <button
+              type="submit"
+              className="w-full text-sm font-black uppercase text-white bg-[#111111] py-4 rounded-xl border-2 border-[#111111] shadow-[4px_4px_0px_0px_#D62828] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all"
+            >
+              Book Now →
+            </button>
+          </form>
+        </div>
+      </main>
     </div>
   )
 }

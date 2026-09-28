@@ -101,7 +101,7 @@ export default function UnitDetailPage() {
     <div className="min-h-screen text-[#111111] selection:bg-[#D62828] selection:text-white" style={{ fontFamily: BODY_FONT, background: '#F4F1EA' }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');`}</style>
 
-      {/* Brutalist Navigation */}
+      {/* Brutalist Navigation Bar */}
       <nav className="sticky top-0 z-50 bg-[#111111] border-b-2 border-[#111111] text-white">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-5 md:px-10 py-4">
           <Link to="/" className="flex items-center gap-3.5 group">
@@ -121,7 +121,8 @@ export default function UnitDetailPage() {
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto px-5 py-12">
+      {/* Main Reservation Card Wrapper */}
+      <main className="max-w-3xl mx-auto px-5 py-12 md:py-16">
         {location && (
           <Link to={'/locations/' + location.id} className="inline-block text-xs font-black uppercase tracking-wider text-[#7A7A7A] hover:text-[#111111] mb-6 bg-white px-4 py-2 rounded-lg border-2 border-[#111111] shadow-[2px_2px_0px_0px_#111111] transition-all">
             ← Back to {location.name}
@@ -132,26 +133,26 @@ export default function UnitDetailPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-[#111111] pb-6 mb-8">
             <div>
               <span className="bg-[#111111] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded mb-3 inline-block">
-                Verified Unit
+                Verified Suite
               </span>
-              <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight" style={{ fontFamily: HEADING_FONT }}>
+              <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight" style={{ fontFamily: HEADING_FONT }}>
                 {TYPE_LABELS[unit.type]}
               </h1>
             </div>
             <div className="text-left md:text-right">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#7A7A7A]">Rate</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-[#7A7A7A]">Nightly Rate</p>
               <p className="text-2xl font-black" style={{ color: RED }}>KES {unit.price.toLocaleString()} <span className="text-xs font-medium text-[#5A5A5A]">/ night</span></p>
             </div>
           </div>
 
-          {unit.description && <p className="text-base font-medium text-[#5A5A5A] leading-relaxed mb-6">{unit.description}</p>}
+          {unit.description && <p className="text-base font-medium text-[#5A5A5A] leading-relaxed mb-4">{unit.description}</p>}
           <p className="text-xs font-bold uppercase tracking-wider text-[#7A7A7A] mb-8 bg-[#F4F1EA] p-3 rounded-xl border border-[#111111]">
             Prices shown are for the current season and may change.
           </p>
 
           {unit.amenities.length > 0 && (
             <div className="mb-8">
-              <h3 className="text-xs font-black uppercase tracking-widest mb-3 text-[#111111]">Unit Amenities</h3>
+              <h3 className="text-xs font-black uppercase tracking-widest mb-3 text-[#111111]">Included Amenities</h3>
               <div className="flex flex-wrap gap-2">
                 {unit.amenities.map((a) => (
                   <span key={a} className="bg-[#F4F1EA] border-2 border-[#111111] text-xs font-bold uppercase px-3 py-1.5 rounded-xl shadow-[2px_2px_0px_0px_#111111]">
@@ -164,7 +165,7 @@ export default function UnitDetailPage() {
 
           {/* Booking Form */}
           <form onSubmit={handleSubmit} className="space-y-6 pt-6 border-t-2 border-[#111111]">
-            <h3 className="text-xl font-black uppercase tracking-tight" style={{ fontFamily: HEADING_FONT }}>Reserve Your Stay</h3>
+            <h3 className="text-xl font-black uppercase tracking-tight" style={{ fontFamily: HEADING_FONT }}>Reserve Your Dates</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>

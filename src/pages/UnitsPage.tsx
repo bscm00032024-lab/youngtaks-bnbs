@@ -11,34 +11,32 @@ const BODY_FONT = "'DM Sans', sans-serif"
 const RED = '#D62828'
 
 export default function UnitsPage() {
-  const { locationId } = useParams<{ locationId: string }>()
+  const params = useParams<Record<string, string | undefined>>()
+  const resolvedId = Object.values(params)[0] || ''
+
   const [location, setLocation] = useState<Location | null>(null)
   const [units, setUnits] = useState<Unit[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!locationId) {
+    if (!resolvedId) {
+      setError('Location ID not found in URL.')
       setLoading(false)
       return
     }
 
-    async function loadData() {
-      try {
-        const [loc, unitList] = await Promise.all([
-          getLocationById(locationId!).catch(() => null),
-          getUnitsByLocation(locationId!).catch(() => [])
-        ])
+    Promise.all([
+      getLocationById(resolvedId).catch(() => null),
+      getUnitsByLocation(resolvedId).catch(() => [])
+    ])
+      .then(([loc, unitList]) => {
         setLocation(loc)
         setUnits(unitList || [])
-      } catch (err) {
-        console.error('Error loading location suites:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadData()
-  }, [locationId])
+      })
+      .catch(() => setError('Could not load location details.'))
+      .finally(() => setLoading(false))
+  }, [resolvedId])
 
   return (
     <div className="min-h-screen text-[#111111] selection:bg-[#D62828] selection:text-white" style={{ fontFamily: BODY_FONT, background: '#F4F1EA' }}>
@@ -70,11 +68,19 @@ export default function UnitsPage() {
           ← Back to All Destinations
         </Link>
 
-        {loading ? (
+        {loading && (
           <div className="bg-white rounded-2xl border-2 border-[#111111] p-12 text-center shadow-[6px_6px_0px_0px_#111111]">
             <p className="font-black uppercase tracking-widest text-sm text-[#7A7A7A] animate-pulse">Loading destination suites...</p>
           </div>
-        ) : (
+        )}
+
+        {error && (
+          <div className="p-6 bg-red-100 border-2 border-red-600 text-red-700 font-bold rounded-2xl shadow-[6px_6px_0px_0px_#111111]">
+            {error}
+          </div>
+        )}
+
+        {!loading && !error && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             
             {/* Left Column: Sticky Destination Info */}
@@ -86,7 +92,7 @@ export default function UnitsPage() {
                 {location?.name || 'Coastal Residence'}
               </h1>
               <p className="text-base font-medium text-[#5A5A5A] leading-relaxed mb-6">
-                {location?.description || 'Explore our premier furnished apartments and beachfront suites along the coast.'}
+                {location?.description || 'Explore our premier furnished apartments and beachfront suites along the Kenyan coast.'}
               </p>
 
               <div className="pt-6 border-t-2 border-[#E5E3DD] space-y-3 text-xs font-bold uppercase tracking-wider text-[#3A3A3A]">

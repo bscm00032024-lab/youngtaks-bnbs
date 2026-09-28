@@ -7,6 +7,8 @@ import {
   updateUnit,
   deleteUnit,
   uploadUnitMedia,
+  getUnitLocationLinks,
+  saveUnitLocationLink,
 } from '../../lib/queries'
 import type { Location, Unit, UnitType } from '../../lib/database.types'
 
@@ -25,6 +27,7 @@ export default function AdminLocationUnitsPage() {
 
   const [location, setLocation] = useState<Location | null>(null)
   const [units, setUnits] = useState<Unit[]>([])
+  const [locationLinks, setLocationLinks] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -32,6 +35,7 @@ export default function AdminLocationUnitsPage() {
   const [newPrice, setNewPrice] = useState('')
   const [newAmenities, setNewAmenities] = useState('')
   const [newDescription, setNewDescription] = useState('')
+  const [newLocationLink, setNewLocationLink] = useState('')
   const [creating, setCreating] = useState(false)
 
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -39,6 +43,7 @@ export default function AdminLocationUnitsPage() {
   const [editPrice, setEditPrice] = useState('')
   const [editAmenities, setEditAmenities] = useState('')
   const [editDescription, setEditDescription] = useState('')
+  const [editLocationLink, setEditLocationLink] = useState('')
   const [saving, setSaving] = useState(false)
 
   const [uploadingId, setUploadingId] = useState<string | null>(null)
@@ -47,9 +52,14 @@ export default function AdminLocationUnitsPage() {
     if (!locationId) return
     setLoading(true)
     Promise.all([getUnitsByLocation(locationId), getLocationById(locationId)])
-      .then(([u, loc]) => {
+      .then(async ([u, loc]) => {
         setUnits(u)
         setLocation(loc)
+        try {
+          setLocationLinks(await getUnitLocationLinks(u.map((x) => x.id)))
+        } catch {
+          setLocationLinks({})
+        }
       })
       .catch(() => setError('Could not load units for this location.'))
       .finally(() => setLoading(false))
@@ -70,16 +80,24 @@ export default function AdminLocationUnitsPage() {
     }
     setCreating(true)
     try {
-      await createUnit({
+      const created = await createUnit({
         location_id: locationId,
         type: newType,
         price: priceNum,
         amenities: newAmenities.split(',').map((a) => a.trim()).filter(Boolean),
         description: newDescription.trim() || null,
       })
+      if (newLocationLink.trim()) {
+        try {
+          await saveUnitLocationLink(created.id, newLocationLink)
+        } catch {
+          alert('The unit was created, but the location link could not be saved. Make sure the database step was run, then edit the unit and add the link again.')
+        }
+      }
       setNewPrice('')
       setNewAmenities('')
       setNewDescription('')
+      setNewLocationLink('')
       load()
     } catch {
       alert('Could not create unit.')
@@ -94,6 +112,7 @@ export default function AdminLocationUnitsPage() {
     setEditPrice(String(unit.price))
     setEditAmenities(unit.amenities.join(', '))
     setEditDescription(unit.description ?? '')
+    setEditLocationLink(locationLinks[unit.id] ?? '')
   }
 
   async function handleSaveEdit(id: string) {
@@ -110,6 +129,11 @@ export default function AdminLocationUnitsPage() {
         amenities: editAmenities.split(',').map((a) => a.trim()).filter(Boolean),
         description: editDescription.trim() || null,
       })
+      try {
+        await saveUnitLocationLink(id, editLocationLink)
+      } catch {
+        alert('Unit details were saved, but the location link could not be saved. Make sure the database step was run.')
+      }
       setEditingId(null)
       load()
     } catch {
@@ -201,6 +225,16 @@ export default function AdminLocationUnitsPage() {
           className="w-full border border-gray-300 rounded-md p-2 text-sm"
           rows={2}
         />
+        <input
+          type="text"
+          placeholder="Location link (Google Maps) - private"
+          value={newLocationLink}
+          onChange={(e) => setNewLocationLink(e.target.value)}
+          className="w-full border border-gray-300 rounded-md p-2 text-sm"
+        />
+        <p className="text-xs text-gray-400">
+          The location link is never shown on the public site. Guests only see it after their payment is confirmed.
+        </p>
         <button
           type="submit"
           disabled={creating}
@@ -244,6 +278,13 @@ export default function AdminLocationUnitsPage() {
                   className="w-full border border-gray-300 rounded-md p-2 text-sm"
                   rows={2}
                 />
+                <input
+                  type="text"
+                  placeholder="Location link (Google Maps) - private"
+                  value={editLocationLink}
+                  onChange={(e) => setEditLocationLink(e.target.value)}
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                />
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleSaveEdit(unit.id)}
@@ -266,6 +307,14 @@ export default function AdminLocationUnitsPage() {
                   {unit.amenities.length > 0 && (
                     <p className="text-xs text-gray-400 mt-1">{unit.amenities.join(', ')}</p>
                   )}
+                  <p className="text-xs mt-1">
+                    <span className="font-semibold text-gray-500">Private location link:</span>{' '}
+                    {locationLinks[unit.id] ? (
+                      <span className="text-gray-600 break-all">{locationLinks[unit.id]}</span>
+                    ) : (
+                      <span className="text-gray-400">not set</span>
+                    )}
+                  </p>
                 </div>
                 <div className="flex gap-3 text-sm">
                   <button onClick={() => startEdit(unit)} className="text-brand-red hover:underline">Edit</button>

@@ -23,7 +23,6 @@ const BODY_FONT = "'DM Sans', sans-serif"
 
 const RED = '#D62828'
 const INK = '#111111'
-const CARD_BORDER = '#111111'
 
 const LOCATION_ORDER = ['Mombasa Town', 'Buxton Point', 'Shanzu', 'Nyali', 'Bamburi', 'Diani']
 const HERO_AREAS = 'Mombasa · Nyali · Bamburi · Diani'

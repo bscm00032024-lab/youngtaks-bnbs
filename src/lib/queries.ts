@@ -378,3 +378,42 @@ export async function removeHeroMedia(): Promise<SiteSettings> {
   if (error) throw error
   return data as SiteSettings
 }
+
+// ---- Private unit location links (admin only; released to guests after payment) ----
+const untypedSupabase: any = supabase
+
+export async function getUnitLocationLinks(unitIds: string[]): Promise<Record<string, string>> {
+  if (unitIds.length === 0) return {}
+  const { data, error } = await untypedSupabase
+    .from('unit_private_details')
+    .select('unit_id, location_link')
+    .in('unit_id', unitIds)
+
+  if (error) throw error
+  const result: Record<string, string> = {}
+  for (const row of data ?? []) {
+    if (row.location_link) result[row.unit_id] = row.location_link
+  }
+  return result
+}
+
+export async function saveUnitLocationLink(unitId: string, link: string): Promise<void> {
+  const trimmed = link.trim()
+  if (!trimmed) {
+    const { error } = await untypedSupabase.from('unit_private_details').delete().eq('unit_id', unitId)
+    if (error) throw error
+    return
+  }
+  const { error } = await untypedSupabase
+    .from('unit_private_details')
+    .upsert({ unit_id: unitId, location_link: trimmed })
+  if (error) throw error
+}
+
+export async function getBookingLocationLink(bookingId: string): Promise<string | null> {
+  const { data, error } = await untypedSupabase.rpc('get_booking_location', {
+    p_booking_id: bookingId,
+  })
+  if (error) return null
+  return (data as string | null) ?? null
+}

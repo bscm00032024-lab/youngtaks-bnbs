@@ -105,6 +105,18 @@ export default function UnitDetailPage() {
     setLightboxIndex((i) => (i === null ? i : (i - 1 + photos.length) % photos.length))
   }
 
+  function handleShare() {
+    const message =
+      'Check out this ' +
+      TYPE_LABELS[unit!.type] +
+      (location ? ' in ' + location.name : '') +
+      ' on YoungTaks BNBs. KES ' +
+      unit!.price.toLocaleString() +
+      ' per night.\n' +
+      window.location.href
+    window.open('https://wa.me/?text=' + encodeURIComponent(message), '_blank', 'noopener')
+  }
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setFormError(null)
@@ -152,9 +164,7 @@ export default function UnitDetailPage() {
               <p className="text-[10px] font-bold tracking-widest text-[#D62828] uppercase">Coastal Residences</p>
             </div>
           </Link>
-          <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="text-xs font-black uppercase bg-[#D62828] text-white px-5 py-2.5 rounded-xl border-2 border-[#D62828] shadow-[3px_3px_0px_0px_#ffffff]">
-            WhatsApp Concierge
-          </a>
+          <a href={WHATSAPP_URL} target="_blank" rel="noreferrer" className="text-xs font-black uppercase bg-[#D62828] text-white px-5 py-2.5 rounded-xl border-2 border-[#D62828] shadow-[3px_3px_0px_0px_#ffffff]">WhatsApp Concierge</a>
         </div>
       </nav>
 
@@ -167,7 +177,7 @@ export default function UnitDetailPage() {
         )}
 
         <div className="bg-white rounded-2xl border-2 border-[#111111] p-8 md:p-12 shadow-[8px_8px_0px_0px_#111111]">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-[#111111] pb-6 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-[#111111] pb-6 mb-6">
             <div>
               <span className="bg-[#111111] text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded mb-3 inline-block">
                 Verified Suite
@@ -180,6 +190,13 @@ export default function UnitDetailPage() {
               <p className="text-xs font-bold uppercase tracking-wider text-[#7A7A7A]">Nightly Rate</p>
               <p className="text-2xl font-black" style={{ color: RED }}>KES {unit.price.toLocaleString()} <span className="text-xs font-medium text-[#5A5A5A]">/ night</span></p>
             </div>
+          </div>
+
+          {/* Share on WhatsApp */}
+          <div className="mb-8">
+            <button type="button" onClick={handleShare} className="text-xs font-black uppercase text-white px-5 py-3 rounded-xl border-2 border-[#111111] shadow-[3px_3px_0px_0px_#111111] bg-[#25D366]">
+              Share on WhatsApp
+            </button>
           </div>
 
           {/* Photo Gallery */}

@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getAdminBookings, approveBooking, type BookingWithUnit } from '../../lib/queries'
+import {
+  getAdminBookings,
+  approveBooking,
+  getUnitLocationLinks,
+  type BookingWithUnit,
+} from '../../lib/queries'
 import { signOut } from '../../lib/auth'
 
 const TYPE_LABELS: Record<string, string> = {
@@ -11,9 +16,50 @@ const TYPE_LABELS: Record<string, string> = {
   other: 'More',
 }
 
+function formatDate(value: string): string {
+  const d = new Date(value)
+  if (isNaN(d.getTime())) return value
+  return d.toLocaleDateString('en-GB', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  })
+}
+
+function toWhatsAppNumber(phone: string): string | null {
+  let digits = phone.replace(/\D/g, '')
+  if (digits.startsWith('00')) digits = digits.slice(2)
+  if (digits.startsWith('254') && digits.length === 12) return digits
+  if (digits.startsWith('0') && digits.length === 10) return '254' + digits.slice(1)
+  if (digits.length === 9 && (digits.startsWith('7') || digits.startsWith('1'))) return '254' + digits
+  return null
+}
+
+function buildGuestMessage(booking: BookingWithUnit, fallbackLocation: string): string {
+  const firstName = (booking.customer_name ?? '').trim().split(' ')[0]
+  const stay = booking.unit ? TYPE_LABELS[booking.unit.type] : 'your unit'
+  const location = (booking.location_pin && booking.location_pin.trim()) || fallbackLocation
+  const lines: string[] = [
+    'Hi ' + (firstName || 'there') + ', your YoungTaks BNBs booking is confirmed! ✅',
+    '',
+    'Stay: ' + stay,
+    'Check-in: ' + formatDate(booking.check_in) + ' from 10:00 AM',
+    'Check-out: ' + formatDate(booking.check_out) + ' by 10:00 AM',
+    '',
+  ]
+  if (booking.door_code) lines.push('Door code: ' + booking.door_code)
+  if (booking.wifi_details) lines.push('WiFi: ' + booking.wifi_details)
+  if (location) lines.push('Location: ' + location)
+  lines.push('', 'Need anything? Just reply to this message. Welcome!')
+  return lines.join('\n')
+}
+
 export default function AdminBookingsPage() {
   const navigate = useNavigate()
   const [bookings, setBookings] = useState<BookingWithUnit[]>([])
+  const [locationLinks, setLocationLinks] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [approvingId, setApprovingId] = useState<string | null>(null)
@@ -25,7 +71,17 @@ export default function AdminBookingsPage() {
   function load() {
     setLoading(true)
     getAdminBookings()
-      .then(setBookings)
+      .then(async (b) => {
+        setBookings(b)
+        const unitIds = Array.from(
+          new Set(b.map((x) => x.unit?.id).filter((id): id is string => !!id))
+        )
+        try {
+          setLocationLinks(await getUnitLocationLinks(unitIds))
+        } catch {
+          setLocationLinks({})
+        }
+      })
       .catch(() => setError('Could not load bookings.'))
       .finally(() => setLoading(false))
   }
@@ -39,6 +95,11 @@ export default function AdminBookingsPage() {
     navigate('/admin/login')
   }
 
+  function savedLinkFor(booking: BookingWithUnit): string {
+    if (!booking.unit) return ''
+    return locationLinks[booking.unit.id] ?? ''
+  }
+
   function startApproving(booking: BookingWithUnit) {
     setApprovingId(booking.id)
     setWifi('')
@@ -46,14 +107,15 @@ export default function AdminBookingsPage() {
     setPin('')
   }
 
-  async function handleApprove(bookingId: string) {
-    if (!wifi.trim() || !door.trim() || !pin.trim()) {
-      alert('Please fill in WiFi, door code, and location pin before approving.')
+  async function handleApprove(booking: BookingWithUnit) {
+    const pinToSend = pin.trim() || savedLinkFor(booking)
+    if (!wifi.trim() || !door.trim() || !pinToSend) {
+      alert('Please fill in WiFi and door code, and add a location pin (or save a location link on the unit first).')
       return
     }
     setSubmitting(true)
     try {
-      await approveBooking(bookingId, wifi.trim(), door.trim(), pin.trim())
+      await approveBooking(booking.id, wifi.trim(), door.trim(), pinToSend)
       setApprovingId(null)
       load()
     } catch {
@@ -61,6 +123,20 @@ export default function AdminBookingsPage() {
     } finally {
       setSubmitting(false)
     }
+  }
+
+  function handleSendWhatsApp(booking: BookingWithUnit) {
+    const number = toWhatsAppNumber(booking.customer_phone)
+    if (!number) {
+      alert(
+        "This guest's phone number does not look like a Kenyan mobile number (" +
+          booking.customer_phone +
+          '). Message them manually instead.'
+      )
+      return
+    }
+    const message = buildGuestMessage(booking, savedLinkFor(booking))
+    window.open('https://wa.me/' + number + '?text=' + encodeURIComponent(message), '_blank', 'noopener')
   }
 
   if (loading) return <p className="p-4 text-gray-500">Loading bookings...</p>
@@ -123,6 +199,20 @@ export default function AdminBookingsPage() {
               </button>
             )}
 
+            {booking.status === 'confirmed' && (
+              <div className="mt-3 pt-3 border-t border-gray-100">
+                <button
+                  onClick={() => handleSendWhatsApp(booking)}
+                  className="bg-green-600 text-white text-sm font-semibold px-4 py-2 rounded-md hover:opacity-90"
+                >
+                  Send details on WhatsApp
+                </button>
+                <p className="text-xs text-gray-400 mt-1">
+                  Opens WhatsApp with the message ready. Tap Send to deliver it.
+                </p>
+              </div>
+            )}
+
             {approvingId === booking.id && (
               <div className="mt-3 space-y-2 border-t border-gray-100 pt-3">
                 <input
@@ -141,14 +231,23 @@ export default function AdminBookingsPage() {
                 />
                 <input
                   type="text"
-                  placeholder="Location pin (link or coordinates)"
+                  placeholder={
+                    savedLinkFor(booking)
+                      ? 'Location pin (leave blank to use the unit’s saved link)'
+                      : 'Location pin (link or coordinates)'
+                  }
                   value={pin}
                   onChange={(e) => setPin(e.target.value)}
                   className="w-full border border-gray-300 rounded-md p-2 text-sm"
                 />
+                {savedLinkFor(booking) && (
+                  <p className="text-xs text-gray-400 break-all">
+                    Saved link for this unit: {savedLinkFor(booking)}
+                  </p>
+                )}
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleApprove(booking.id)}
+                    onClick={() => handleApprove(booking)}
                     disabled={submitting}
                     className="bg-brand-red text-white text-sm font-semibold px-4 py-2 rounded-md hover:opacity-90 disabled:opacity-50"
                   >

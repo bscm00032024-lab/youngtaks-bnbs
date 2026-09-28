@@ -15,31 +15,23 @@ export default function UnitsPage() {
   const [location, setLocation] = useState<Location | null>(null)
   const [units, setUnits] = useState<Unit[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!locationId) {
-      setError('Location ID not found.')
       setLoading(false)
       return
     }
 
     async function loadData() {
       try {
-        const loc = await getLocationById(locationId!).catch((err) => {
-          console.error('Location fetch error:', err)
-          return null
-        })
-        const unitList = await getUnitsByLocation(locationId!).catch((err) => {
-          console.error('Units fetch error:', err)
-          return []
-        })
-
+        const [loc, unitList] = await Promise.all([
+          getLocationById(locationId!).catch(() => null),
+          getUnitsByLocation(locationId!).catch(() => [])
+        ])
         setLocation(loc)
         setUnits(unitList || [])
       } catch (err) {
-        console.error('General loading error:', err)
-        setError('Could not load location details.')
+        console.error('Error loading location suites:', err)
       } finally {
         setLoading(false)
       }
@@ -78,15 +70,11 @@ export default function UnitsPage() {
           ← Back to All Destinations
         </Link>
 
-        {loading && (
+        {loading ? (
           <div className="bg-white rounded-2xl border-2 border-[#111111] p-12 text-center shadow-[6px_6px_0px_0px_#111111]">
             <p className="font-black uppercase tracking-widest text-sm text-[#7A7A7A] animate-pulse">Loading destination suites...</p>
           </div>
-        )}
-
-        {error && <div className="p-4 bg-red-100 border-2 border-red-600 text-red-700 font-bold rounded-xl">{error}</div>}
-
-        {!loading && !error && (
+        ) : (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             
             {/* Left Column: Sticky Destination Info */}
@@ -98,7 +86,7 @@ export default function UnitsPage() {
                 {location?.name || 'Coastal Residence'}
               </h1>
               <p className="text-base font-medium text-[#5A5A5A] leading-relaxed mb-6">
-                {location?.description || 'Explore our premier furnished apartments and beachfront suites along the Kenyan coast.'}
+                {location?.description || 'Explore our premier furnished apartments and beachfront suites along the coast.'}
               </p>
 
               <div className="pt-6 border-t-2 border-[#E5E3DD] space-y-3 text-xs font-bold uppercase tracking-wider text-[#3A3A3A]">

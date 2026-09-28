@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getLocationById, getUnitsByLocation, type Location, type Unit } from '../lib/queries'
+import { getLocationById, getUnitsByLocation } from '../lib/queries'
+import type { Location, Unit } from '../lib/database.types'
 import logo from '../assets/logo.png.png'
 
 const WHATSAPP_URL = 'https://wa.me/254796807457'
@@ -104,7 +105,7 @@ export default function LocationDetailPage() {
                   </a>
                 </div>
               ) : (
-                units.map((unit) => (
+                units.map((unit: Unit) => (
                   <div 
                     key={unit.id} 
                     className="bg-white rounded-2xl border-2 border-[#111111] p-6 md:p-8 shadow-[6px_6px_0px_0px_#111111] flex flex-col sm:flex-row sm:items-center justify-between gap-6 group hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_#D62828] transition-all"
@@ -124,7 +125,7 @@ export default function LocationDetailPage() {
 
                       {unit.amenities && unit.amenities.length > 0 && (
                         <div className="flex flex-wrap gap-1.5 pt-2">
-                          {unit.amenities.map((amenity, idx) => (
+                          {unit.amenities.map((amenity: string, idx: number) => (
                             <span key={idx} className="bg-[#F4F1EA] border border-[#111111] text-[10px] font-bold uppercase px-2 py-0.5 rounded">
                               {amenity}
                             </span>

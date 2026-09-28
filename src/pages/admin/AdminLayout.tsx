@@ -1,9 +1,15 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { signOut } from '../../lib/auth'
 
+const HEADING_FONT = "'Archivo', sans-serif"
+const BODY_FONT = "'DM Sans', sans-serif"
+const RED = '#D62828'
+
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
-  'px-3 py-2 rounded-md text-sm font-medium ' +
-  (isActive ? 'bg-brand-red text-white' : 'text-brand-black hover:bg-gray-100')
+  'px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border-2 border-[#111111] ' +
+  (isActive
+    ? 'bg-[#111111] text-white shadow-[3px_3px_0px_0px_#D62828]'
+    : 'bg-white text-[#111111] hover:bg-[#F4F1EA] shadow-[2px_2px_0px_0px_#111111]')
 
 export default function AdminLayout() {
   const navigate = useNavigate()
@@ -14,16 +20,27 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="border-b border-gray-200 p-4 flex justify-between items-center">
+    <div className="min-h-screen text-[#111111] selection:bg-[#D62828] selection:text-white" style={{ fontFamily: BODY_FONT, background: '#F4F1EA' }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');`}</style>
+
+      {/* Top Header Bar */}
+      <div className="bg-[#111111] border-b-2 border-[#111111] text-white px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <div>
-          <h1 className="text-lg font-bold">YoungTaks Admin</h1>
+          <h1 className="text-xl font-black uppercase tracking-tight" style={{ fontFamily: HEADING_FONT }}>
+            YoungTaks <span style={{ color: RED }}>Admin</span>
+          </h1>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-[#9A9A9A]">Coast Management Suite</p>
         </div>
-        <button onClick={handleSignOut} className="text-sm text-gray-500 hover:underline">
-          Sign out
+        <button
+          onClick={handleSignOut}
+          className="text-xs font-black uppercase text-white bg-[#D62828] px-4 py-2 rounded-xl border-2 border-[#D62828] shadow-[3px_3px_0px_0px_#ffffff] hover:translate-x-[1px] hover:translate-y-[1px] transition-all"
+        >
+          Sign Out
         </button>
       </div>
-      <nav className="flex gap-2 p-3 border-b border-gray-100 bg-gray-50 overflow-x-auto">
+
+      {/* Navigation Tabs Bar */}
+      <nav className="max-w-7xl mx-auto px-5 md:px-10 py-6 flex gap-3 overflow-x-auto">
         <NavLink to="/admin/bookings" className={navLinkClass}>
           Bookings
         </NavLink>
@@ -37,9 +54,11 @@ export default function AdminLayout() {
           Blog
         </NavLink>
       </nav>
-      <div>
+
+      {/* Main Content Container */}
+      <main className="max-w-7xl mx-auto px-5 md:px-10 pb-16">
         <Outlet />
-      </div>
+      </main>
     </div>
   )
 }

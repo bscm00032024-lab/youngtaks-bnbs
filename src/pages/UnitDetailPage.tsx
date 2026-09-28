@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { getUnitById, getLocationById } from '../lib/queries'
 import type { Unit, Location, UnitType } from '../lib/database.types'
@@ -9,6 +9,12 @@ const HEADING_FONT = "'Archivo', sans-serif"
 const BODY_FONT = "'DM Sans', sans-serif"
 const RED = '#D62828'
 const INK = '#111111'
+
+const noSave: React.CSSProperties = {
+  WebkitTouchCallout: 'none',
+  WebkitUserSelect: 'none',
+  userSelect: 'none',
+}
 
 const TYPE_LABELS: Record<UnitType, string> = {
   studio: 'Studio',
@@ -33,12 +39,17 @@ export default function UnitDetailPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activePhoto, setActivePhoto] = useState(0)
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const touchStartX = useRef<number | null>(null)
 
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
   const [customerName, setCustomerName] = useState('')
   const [customerPhone, setCustomerPhone] = useState('')
   const [formError, setFormError] = useState<string | null>(null)
+
+  const photos: string[] = unit?.photos ?? []
+  const videos: string[] = unit?.videos ?? []
 
   useEffect(() => {
     if (!unitId) return
@@ -54,6 +65,23 @@ export default function UnitDetailPage() {
       .finally(() => setLoading(false))
   }, [unitId])
 
+  useEffect(() => {
+    if (lightboxIndex === null) return
+    const total = photos.length
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setLightboxIndex(null)
+      else if (e.key === 'ArrowRight') setLightboxIndex((i) => (i === null ? i : (i + 1) % total))
+      else if (e.key === 'ArrowLeft') setLightboxIndex((i) => (i === null ? i : (i - 1 + total) % total))
+    }
+    window.addEventListener('keydown', onKey)
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [lightboxIndex, photos.length])
+
   if (loading) {
     return <div className="min-h-screen bg-[#F4F1EA] flex items-center justify-center font-black uppercase tracking-widest text-sm text-[#7A7A7A]">Loading unit details...</div>
   }
@@ -66,10 +94,16 @@ export default function UnitDetailPage() {
     return <div className="min-h-screen bg-[#F4F1EA] flex items-center justify-center font-bold text-red-600">Unit not found.</div>
   }
 
-  const photos: string[] = unit.photos ?? []
-  const videos: string[] = unit.videos ?? []
   const nights = checkIn && checkOut ? nightsBetween(checkIn, checkOut) : 0
   const total = nights > 0 ? nights * unit.price : 0
+
+  function goNext() {
+    setLightboxIndex((i) => (i === null ? i : (i + 1) % photos.length))
+  }
+
+  function goPrev() {
+    setLightboxIndex((i) => (i === null ? i : (i - 1 + photos.length) % photos.length))
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -150,14 +184,25 @@ export default function UnitDetailPage() {
 
           {/* Photo Gallery */}
           {photos.length > 0 && (
-            <div className="mb-8">
-              <div className="rounded-2xl border-2 border-[#111111] overflow-hidden shadow-[4px_4px_0px_0px_#111111]">
+            <div className="mb-8" style={noSave} onContextMenu={(e) => e.preventDefault()}>
+              <button
+                type="button"
+                onClick={() => setLightboxIndex(Math.min(activePhoto, photos.length - 1))}
+                aria-label="View photo full screen"
+                className="relative block w-full rounded-2xl border-2 border-[#111111] overflow-hidden shadow-[4px_4px_0px_0px_#111111] cursor-zoom-in"
+                style={noSave}
+              >
                 <img
                   src={photos[Math.min(activePhoto, photos.length - 1)]}
                   alt={TYPE_LABELS[unit.type] + ' photo'}
+                  draggable={false}
                   className="w-full h-64 md:h-96 object-cover"
+                  style={{ pointerEvents: 'none', ...noSave }}
                 />
-              </div>
+                <span className="absolute bottom-3 right-3 bg-[#111111]/80 text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded">
+                  Tap to enlarge
+                </span>
+              </button>
               {photos.length > 1 && (
                 <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
                   {photos.map((url, i) => (
@@ -166,9 +211,16 @@ export default function UnitDetailPage() {
                       type="button"
                       onClick={() => setActivePhoto(i)}
                       className="flex-shrink-0 rounded-lg overflow-hidden border-2"
-                      style={{ borderColor: i === activePhoto ? RED : INK }}
+                      style={{ borderColor: i === activePhoto ? RED : INK, ...noSave }}
                     >
-                      <img src={url} alt={'Thumbnail ' + (i + 1)} loading="lazy" className="h-16 w-24 object-cover" />
+                      <img
+                        src={url}
+                        alt={'Thumbnail ' + (i + 1)}
+                        loading="lazy"
+                        draggable={false}
+                        className="h-16 w-24 object-cover"
+                        style={{ pointerEvents: 'none', ...noSave }}
+                      />
                     </button>
                   ))}
                 </div>
@@ -185,8 +237,11 @@ export default function UnitDetailPage() {
                   key={url + i}
                   src={url}
                   controls
+                  controlsList="nodownload noplaybackrate"
+                  disablePictureInPicture
                   playsInline
                   preload="metadata"
+                  onContextMenu={(e) => e.preventDefault()}
                   className="w-full rounded-2xl border-2 border-[#111111] bg-black"
                 />
               ))}
@@ -277,6 +332,81 @@ export default function UnitDetailPage() {
           </form>
         </div>
       </main>
+
+      {/* Full-screen photo viewer */}
+      {lightboxIndex !== null && photos.length > 0 && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center"
+          style={noSave}
+          onClick={() => setLightboxIndex(null)}
+          onContextMenu={(e) => e.preventDefault()}
+          onTouchStart={(e) => {
+            touchStartX.current = e.touches[0].clientX
+          }}
+          onTouchEnd={(e) => {
+            if (touchStartX.current === null) return
+            const dx = e.changedTouches[0].clientX - touchStartX.current
+            touchStartX.current = null
+            if (Math.abs(dx) > 50 && photos.length > 1) {
+              if (dx < 0) goNext()
+              else goPrev()
+            }
+          }}
+        >
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              setLightboxIndex(null)
+            }}
+            aria-label="Close"
+            className="absolute top-4 right-4 z-10 w-11 h-11 rounded-full bg-white text-[#111111] text-xl font-black flex items-center justify-center"
+          >
+            ✕
+          </button>
+
+          {photos.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  goPrev()
+                }}
+                aria-label="Previous photo"
+                className="absolute left-3 z-10 w-11 h-11 rounded-full bg-white/90 text-[#111111] text-xl font-black flex items-center justify-center"
+              >
+                ←
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  goNext()
+                }}
+                aria-label="Next photo"
+                className="absolute right-3 z-10 w-11 h-11 rounded-full bg-white/90 text-[#111111] text-xl font-black flex items-center justify-center"
+              >
+                →
+              </button>
+            </>
+          )}
+
+          <div className="max-w-full max-h-full p-4" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={photos[lightboxIndex]}
+              alt={TYPE_LABELS[unit.type] + ' photo ' + (lightboxIndex + 1)}
+              draggable={false}
+              className="max-h-[85vh] max-w-full object-contain rounded-lg"
+              style={{ pointerEvents: 'none', ...noSave }}
+            />
+          </div>
+
+          <p className="absolute bottom-5 left-1/2 -translate-x-1/2 text-white text-xs font-black uppercase tracking-widest bg-black/60 px-3 py-1.5 rounded-full">
+            {lightboxIndex + 1} / {photos.length}
+          </p>
+        </div>
+      )}
     </div>
   )
 }

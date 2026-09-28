@@ -17,62 +17,11 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<LocationsPage />} />
-      <Route
-        path="/locations/:locationId"
-        element={
-          <div className="min-h-screen bg-white text-brand-black">
-            <header className="p-4 border-b border-gray-200">
-              <a href="/">
-                <h1 className="text-xl font-bold">YoungTaks BNBs</h1>
-                <p className="text-sm text-gray-500">Your Trusted Booking Partner</p>
-              </a>
-            </header>
-            <UnitsPage />
-          </div>
-        }
-      />
-      <Route
-        path="/units/:unitId"
-        element={
-          <div className="min-h-screen bg-white text-brand-black">
-            <header className="p-4 border-b border-gray-200">
-              <a href="/">
-                <h1 className="text-xl font-bold">YoungTaks BNBs</h1>
-                <p className="text-sm text-gray-500">Your Trusted Booking Partner</p>
-              </a>
-            </header>
-            <UnitDetailPage />
-          </div>
-        }
-      />
-      <Route
-        path="/booking/confirm"
-        element={
-          <div className="min-h-screen bg-white text-brand-black">
-            <header className="p-4 border-b border-gray-200">
-              <a href="/">
-                <h1 className="text-xl font-bold">YoungTaks BNBs</h1>
-                <p className="text-sm text-gray-500">Your Trusted Booking Partner</p>
-              </a>
-            </header>
-            <BookingConfirmPage />
-          </div>
-        }
-      />
-      <Route
-        path="/booking/:bookingId/payment"
-        element={
-          <div className="min-h-screen bg-white text-brand-black">
-            <header className="p-4 border-b border-gray-200">
-              <a href="/">
-                <h1 className="text-xl font-bold">YoungTaks BNBs</h1>
-                <p className="text-sm text-gray-500">Your Trusted Booking Partner</p>
-              </a>
-            </header>
-            <PaymentPage />
-          </div>
-        }
-      />
+      <Route path="/locations/:locationId" element={<UnitsPage />} />
+      <Route path="/units/:unitId" element={<UnitDetailPage />} />
+      <Route path="/booking/confirm" element={<BookingConfirmPage />} />
+      <Route path="/booking/:bookingId/payment" element={<PaymentPage />} />
+      
       <Route path="/admin/login" element={<AdminLoginPage />} />
       <Route
         path="/admin"

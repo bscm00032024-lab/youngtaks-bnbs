@@ -11,14 +11,21 @@ const BODY_FONT = "'DM Sans', sans-serif"
 const RED = '#D62828'
 
 export default function LocationDetailPage() {
-  const { id } = useParams<{ id: string }>()
+  const params = useParams<{ id?: string; locationId?: string }>()
+  const id = params.id || params.locationId
+
   const [location, setLocation] = useState<Location | null>(null)
   const [units, setUnits] = useState<Unit[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!id) return
+    if (!id) {
+      setError('Destination ID not found in URL.')
+      setLoading(false)
+      return
+    }
+
     Promise.all([getLocationById(id), getUnitsByLocation(id)])
       .then(([loc, unitList]) => {
         setLocation(loc)
@@ -61,7 +68,7 @@ export default function LocationDetailPage() {
         {loading && <p className="font-black uppercase tracking-widest text-sm text-[#7A7A7A] animate-pulse">Loading destination suites...</p>}
         {error && <div className="p-4 bg-red-100 border-2 border-red-600 text-red-700 font-bold rounded-xl">{error}</div>}
 
-        {location && (
+        {!loading && !error && location && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             
             {/* Left Column: Sticky Destination Info */}

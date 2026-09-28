@@ -11,8 +11,8 @@ const BODY_FONT = "'DM Sans', sans-serif"
 const RED = '#D62828'
 
 export default function LocationDetailPage() {
-  const { locationId, id } = useParams<{ locationId?: string; id?: string }>()
-  const resolvedId = locationId || id
+  const params = useParams<{ id?: string; locationId?: string }>()
+  const resolvedId = params.locationId || params.id
 
   const [location, setLocation] = useState<Location | null>(null)
   const [units, setUnits] = useState<Unit[]>([])

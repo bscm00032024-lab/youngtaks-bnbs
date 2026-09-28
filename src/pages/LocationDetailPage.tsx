@@ -10,6 +10,12 @@ const HEADING_FONT = "'Archivo', sans-serif"
 const BODY_FONT = "'DM Sans', sans-serif"
 const RED = '#D62828'
 
+const noSave: React.CSSProperties = {
+  WebkitTouchCallout: 'none',
+  WebkitUserSelect: 'none',
+  userSelect: 'none',
+}
+
 export default function LocationDetailPage() {
   const params = useParams<{ id?: string; locationId?: string }>()
   const resolvedId = params.locationId || params.id
@@ -128,8 +134,20 @@ export default function LocationDetailPage() {
                       className="bg-white rounded-2xl border-2 border-[#111111] overflow-hidden shadow-[6px_6px_0px_0px_#111111] group hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[8px_8px_0px_0px_#D62828] transition-all"
                     >
                       {cover && (
-                        <Link to={`/units/${unit.id}`} className="block relative border-b-2 border-[#111111]">
-                          <img src={cover} alt={`${unit.type} suite`} loading="lazy" className="w-full h-52 md:h-64 object-cover" />
+                        <Link
+                          to={`/units/${unit.id}`}
+                          className="block relative border-b-2 border-[#111111]"
+                          style={noSave}
+                          onContextMenu={(e) => e.preventDefault()}
+                        >
+                          <img
+                            src={cover}
+                            alt={`${unit.type} suite`}
+                            loading="lazy"
+                            draggable={false}
+                            className="w-full h-52 md:h-64 object-cover"
+                            style={{ pointerEvents: 'none', ...noSave }}
+                          />
                           <div className="absolute bottom-3 left-3 flex gap-2">
                             {photos.length > 1 && (
                               <span className="bg-[#111111] text-white text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded">

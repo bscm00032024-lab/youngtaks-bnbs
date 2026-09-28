@@ -56,6 +56,22 @@ function toUrl(value: string): string | null {
   return null
 }
 
+function ExternalLink({
+  href,
+  className,
+  style,
+  children,
+}: {
+  href: string
+  className?: string
+  style?: React.CSSProperties
+  children: React.ReactNode
+}) {
+  return (
+    <a href={href} target="_blank" rel="noreferrer" className={className} style={style}>{children}</a>
+  )
+}
+
 function CopyButton({ value, label = 'Copy' }: { value: string; label?: string }) {
   const [copied, setCopied] = useState(false)
 
@@ -70,11 +86,7 @@ function CopyButton({ value, label = 'Copy' }: { value: string; label?: string }
   }
 
   return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border-2 border-[#111111] bg-white hover:bg-[#111111] hover:text-white transition-colors whitespace-nowrap"
-    >
+    <button type="button" onClick={handleCopy} className="text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border-2 border-[#111111] bg-white hover:bg-[#111111] hover:text-white transition-colors whitespace-nowrap">
       {copied ? 'Copied ✓' : label}
     </button>
   )
@@ -82,10 +94,7 @@ function CopyButton({ value, label = 'Copy' }: { value: string; label?: string }
 
 function PageShell({ children }: { children: React.ReactNode }) {
   return (
-    <div
-      className="min-h-screen text-[#111111] selection:bg-[#D62828] selection:text-white"
-      style={{ fontFamily: BODY_FONT, background: '#F4F1EA' }}
-    >
+    <div className="min-h-screen text-[#111111] selection:bg-[#D62828] selection:text-white" style={{ fontFamily: BODY_FONT, background: '#F4F1EA' }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');`}</style>
 
       <nav className="sticky top-0 z-50 bg-[#111111] border-b-2 border-[#111111] text-white">
@@ -101,14 +110,9 @@ function PageShell({ children }: { children: React.ReactNode }) {
               <p className="text-[10px] font-bold tracking-widest text-[#D62828] uppercase">Coastal Residences</p>
             </div>
           </Link>
-          
-            href={WHATSAPP_LINK}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs font-black uppercase bg-[#D62828] text-white px-5 py-2.5 rounded-xl border-2 border-[#D62828] shadow-[3px_3px_0px_0px_#ffffff]"
-          >
+          <ExternalLink href={WHATSAPP_LINK} className="text-xs font-black uppercase bg-[#D62828] text-white px-5 py-2.5 rounded-xl border-2 border-[#D62828] shadow-[3px_3px_0px_0px_#ffffff]">
             WhatsApp Concierge
-          </a>
+          </ExternalLink>
         </div>
       </nav>
 
@@ -304,9 +308,7 @@ export default function PaymentPage() {
         <div className="p-4 bg-red-100 border-2 border-red-600 text-red-700 font-bold rounded-xl mb-4">
           Booking not found.
         </div>
-        <Link to="/" className="text-xs font-black uppercase underline underline-offset-4">
-          Back to home
-        </Link>
+        <Link to="/" className="text-xs font-black uppercase underline underline-offset-4">Back to home</Link>
       </PageShell>
     )
   }
@@ -380,10 +382,7 @@ export default function PaymentPage() {
           </div>
         </div>
 
-        <form
-          onSubmit={handleSubmitCode}
-          className="bg-white rounded-2xl border-2 border-[#111111] p-5 md:p-6 shadow-[5px_5px_0px_0px_#111111]"
-        >
+        <form onSubmit={handleSubmitCode} className="bg-white rounded-2xl border-2 border-[#111111] p-5 md:p-6 shadow-[5px_5px_0px_0px_#111111]">
           <h2 className="text-lg font-black uppercase tracking-tight mb-1" style={{ fontFamily: HEADING_FONT }}>
             Paid? Enter your code
           </h2>
@@ -405,20 +404,16 @@ export default function PaymentPage() {
               {submitError}
             </div>
           )}
-          <button
-            type="submit"
-            disabled={submitting}
-            className="mt-4 w-full text-sm font-black uppercase text-white bg-[#111111] py-4 rounded-xl border-2 border-[#111111] shadow-[4px_4px_0px_0px_#D62828] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all disabled:opacity-50"
-          >
+          <button type="submit" disabled={submitting} className="mt-4 w-full text-sm font-black uppercase text-white bg-[#111111] py-4 rounded-xl border-2 border-[#111111] shadow-[4px_4px_0px_0px_#D62828] hover:translate-x-[-2px] hover:translate-y-[-2px] transition-all disabled:opacity-50">
             {submitting ? 'Submitting...' : "I've paid, submit code →"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-xs font-bold text-[#5A5A5A]">
           Need help paying?{' '}
-          <a href={helpLink} target="_blank" rel="noreferrer" className="underline underline-offset-4" style={{ color: RED }}>
+          <ExternalLink href={helpLink} className="underline underline-offset-4" style={{ color: RED }}>
             Chat with us on WhatsApp
-          </a>
+          </ExternalLink>
         </p>
       </PageShell>
     )
@@ -452,15 +447,9 @@ export default function PaymentPage() {
             <p className="text-sm font-medium text-[#5A5A5A] mb-3">
               Taking longer than usual? Message us and we will check it right away.
             </p>
-            
-              href={helpLink}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-block text-xs font-black uppercase text-white px-6 py-3 rounded-xl border-2 border-[#D62828]"
-              style={{ background: RED }}
-            >
+            <ExternalLink href={helpLink} className="inline-block text-xs font-black uppercase text-white px-6 py-3 rounded-xl border-2 border-[#D62828] bg-[#D62828]">
               Chat on WhatsApp
-            </a>
+            </ExternalLink>
           </div>
         )}
       </PageShell>
@@ -475,10 +464,7 @@ export default function PaymentPage() {
       <Steps current={4} />
 
       <div className="bg-[#111111] text-white rounded-2xl border-2 border-[#111111] p-6 md:p-8 shadow-[6px_6px_0px_0px_#D62828] mb-6">
-        <span
-          className="inline-block text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-md mb-3"
-          style={{ background: RED }}
-        >
+        <span className="inline-block text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-md mb-3 bg-[#D62828]">
           Booking confirmed
         </span>
         <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight" style={{ fontFamily: HEADING_FONT }}>
@@ -528,14 +514,9 @@ export default function PaymentPage() {
           </p>
           {locationUrl ? (
             <div className="flex flex-wrap items-center gap-3">
-              
-                href={locationUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs font-black uppercase text-white bg-[#111111] px-6 py-3.5 rounded-xl border-2 border-[#111111] shadow-[3px_3px_0px_0px_#D62828]"
-              >
+              <ExternalLink href={locationUrl} className="text-xs font-black uppercase text-white bg-[#111111] px-6 py-3.5 rounded-xl border-2 border-[#111111] shadow-[3px_3px_0px_0px_#D62828]">
                 Open in Google Maps →
-              </a>
+              </ExternalLink>
               <CopyButton value={locationUrl} label="Copy link" />
             </div>
           ) : locationValue ? (
@@ -563,15 +544,9 @@ export default function PaymentPage() {
       </div>
 
       <div className="text-center">
-        
-          href={helpLink}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-block text-sm font-black uppercase text-white px-8 py-4 rounded-xl border-2 border-[#111111] shadow-[4px_4px_0px_0px_#111111]"
-          style={{ background: '#25D366' }}
-        >
+        <ExternalLink href={helpLink} className="inline-block text-sm font-black uppercase text-white px-8 py-4 rounded-xl border-2 border-[#111111] shadow-[4px_4px_0px_0px_#111111] bg-[#25D366]">
           Need help? Chat on WhatsApp
-        </a>
+        </ExternalLink>
         <p className="mt-2 text-xs font-bold text-[#7A7A7A]">{PHONE_DISPLAY}</p>
       </div>
     </PageShell>
